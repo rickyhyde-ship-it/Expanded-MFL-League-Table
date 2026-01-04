@@ -283,12 +283,8 @@
       flex-wrap: wrap;
     }
 
-    .actions-bar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-      justify-content: flex-end;
-      flex-wrap: wrap;
+    .table-container {
+      overflow-x: auto;
     }
 
     .league-table {
@@ -296,6 +292,7 @@
       border-collapse: separate;
       border-spacing: 0 4px;
       font-size: 12px;
+      white-space: nowrap;
     }
 
     .league-table th {
@@ -309,7 +306,6 @@
       cursor: pointer;
       user-select: none;
       transition: color 0.2s;
-      white-space: nowrap;
     }
 
     .league-table th:hover {
@@ -391,6 +387,7 @@
       border-collapse: collapse;
       font-size: 12px;
       margin-bottom: 20px;
+      white-space: nowrap;
     }
 
     .player-table th,
@@ -545,11 +542,7 @@
   </div>
 
   <script>
-
-// ============================================================================
-// MFL League Table Analytics - Standalone Version
-// ============================================================================
-(function() {
+(function () {
   'use strict';
 
   // ============================================================================
@@ -557,20 +550,24 @@
   // ============================================================================
   const LZString = (function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r){if(!e[r]){e[r]={};for(var o=0;o<r.length;o++)e[r][r.charAt(o)]=o}return e[r]}var i={compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}());
 
+
+
   // ============================================================================
   // CONSTANTS & GLOBALS
   // ============================================================================
   const API_BASE = 'https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod';
 
-  let allCompetitions = [];
-  let selectedCompetitionId = null;
-  let currentCompetitionData = null;
   let globalTeamsMap = null;
   let globalMetadataMap = null;
   let currentTableSort = { column: 'points', asc: false };
 
   // ============================================================================
-  // HTTP HELPER (using fetch instead of GM_xmlhttpRequest)
+  // STYLES
+  // ============================================================================
+  
+
+  // ============================================================================
+  // HTTP HELPER
   // ============================================================================
   const httpGet = async (url) => {
     const response = await fetch(url);
@@ -579,7 +576,9 @@
     }
     return await response.text();
   };
-// ============================================================================
+
+
+  // ============================================================================
   // CONCURRENCY LIMITER
   // ============================================================================
   async function limitConcurrency(tasks, limit = 20) {
@@ -1752,15 +1751,102 @@
   }
 
 
-  
-  function setStatus(msg, type = 'loading') {
-    const el = document.getElementById('status');
-    if (el) {
-      el.textContent = msg;
-      el.className = 'status-text ' + type;
-    }
+  // ============================================================================
+  // UI: CREATE OVERLAY
+  // ============================================================================
+  function createOverlay() {
+    let overlay = document.getElementById('mfl-league-overlay');
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    overlay.id = 'mfl-league-overlay';
+    overlay.innerHTML = `
+      <div class="overlay-header">
+        <h2>League Table</h2>
+        <div class="overlay-header-right">
+          <button class="btn-download" id="mfl-fetch-names">Load Club Names</button>
+          <button class="btn-download" id="mfl-fetch-overalls">Load Player Ratings</button>
+          <button class="btn-download" id="mfl-fetch-player-names">Load Player Names</button>
+          <button class="btn-download" id="mfl-clear-cache">Clear Cache</button>
+          <button class="btn-download" id="mfl-download-csv">Download CSV</button>
+          <span class="btn-toggle">–</span>
+          <span class="btn-close">×</span>
+        </div>
+      </div>
+      <div class="overlay-body">
+        <div class="status-text" id="mfl-status">Loading...</div>
+        <div class="table-container" id="mfl-table-container"></div>
+      </div>
+    `;
+
+    const toggle = overlay.querySelector('.btn-toggle');
+    const handleToggle = (e) => {
+      e.stopPropagation();
+      overlay.classList.toggle('collapsed');
+      toggle.textContent = overlay.classList.contains('collapsed') ? '+' : '–';
+    };
+
+    toggle.onclick = handleToggle;
+
+    // Allow clicking collapsed overlay to expand
+    overlay.onclick = (e) => {
+      if (overlay.classList.contains('collapsed')) {
+        handleToggle(e);
+      }
+    };
+
+    overlay.querySelector('.btn-close').onclick = () => overlay.remove();
+
+    overlay.querySelector('#mfl-download-csv').onclick = (e) => {
+      e.stopPropagation();
+      downloadCSV();
+    };
+
+    overlay.querySelector('#mfl-fetch-names').onclick = async (e) => {
+      e.stopPropagation();
+      if (!globalTeamsMap) {
+        alert('Please wait for initial data to load first.');
+        return;
+      }
+      await enrichTeamNames(globalTeamsMap);
+    };
+
+    overlay.querySelector('#mfl-fetch-overalls').onclick = async (e) => {
+      e.stopPropagation();
+      if (!globalTeamsMap) {
+        alert('Please wait for initial data to load first.');
+        return;
+      }
+      await enrichPlayerOveralls(globalTeamsMap);
+    };
+
+    overlay.querySelector('#mfl-fetch-player-names').onclick = async (e) => {
+      e.stopPropagation();
+      if (!globalTeamsMap) {
+        alert('Please wait for initial data to load first.');
+        return;
+      }
+      await enrichPlayerNames(globalTeamsMap);
+    };
+
+    overlay.querySelector('#mfl-clear-cache').onclick = (e) => {
+      e.stopPropagation();
+      if (confirm('Clear all cached data? This will slow down the next load.')) {
+        const success = clearAllCache();
+        alert(success ? 'Cache cleared!' : 'Failed to clear cache.');
+      }
+    };
+
+    document.body.appendChild(overlay);
+    return overlay;
   }
-// ============================================================================
+
+  function setStatus(msg) {
+    const el = document.getElementById('mfl-status');
+    if (el) el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  }
+
+  // ============================================================================
   // UI: SORT TEAMS
   // ============================================================================
   function sortTeams(teamsMap) {
@@ -2327,6 +2413,13 @@
 
   
   // ============================================================================
+  // STANDALONE VARIABLES
+  // ============================================================================
+  let allCompetitions = [];
+  let selectedCompetitionId = null;
+  let currentCompetitionData = null;
+
+  // ============================================================================
   // FAVORITES MANAGEMENT
   // ============================================================================
   function getFavorites() {
@@ -2463,7 +2556,7 @@
       const codeMatch = comp.code && comp.code.toLowerCase().includes(lowerQuery);
 
       return nameMatch || idMatch || codeMatch;
-    }).slice(0, 20); // Limit to 20 results
+    }).slice(0, 20);
   }
 
   function renderSuggestions(competitions) {
@@ -2509,10 +2602,9 @@
   // AUTO-LOAD ALL DATA (PARALLEL)
   // ============================================================================
   async function autoLoadAllData(teamsMap) {
-    setStatus('Loading all data (names, ratings, player names)...', 'loading');
+    setStatus('Loading all enrichments in parallel...', 'loading');
 
     try {
-      // Load all enrichments in parallel
       await Promise.all([
         enrichTeamNames(teamsMap),
         enrichPlayerOveralls(teamsMap),
@@ -2520,9 +2612,11 @@
       ]);
 
       setStatus('Complete! All data loaded successfully.', 'success');
+      renderLeagueTable(teamsMap);
     } catch (e) {
       console.error('[Auto-load] Error:', e);
       setStatus('Completed with some errors. Check console.', 'error');
+      renderLeagueTable(teamsMap);
     }
   }
 
@@ -2530,21 +2624,18 @@
   // MAIN: LOAD COMPETITION
   // ============================================================================
   async function loadCompetitionById(competitionId) {
-    // Show loading state
     document.getElementById('table-wrapper').style.display = 'none';
     setStatus(`Loading competition ${competitionId}...`, 'loading');
 
     selectedCompetitionId = competitionId;
 
     try {
-      // Step 1: Fetch competition JSON
       const compText = await httpGet(`${API_BASE}/competitions/${competitionId}`);
       const compJson = JSON.parse(compText);
 
       currentCompetitionData = compJson;
       updateFavoriteButton();
 
-      // Update competition header
       document.getElementById('comp-title').textContent = compJson.name || `Competition ${competitionId}`;
       document.getElementById('comp-meta').innerHTML = `
         <span><strong>Status:</strong> ${compJson.status || 'N/A'}</span>
@@ -2554,11 +2645,9 @@
         <span><strong>ID:</strong> ${competitionId}</span>
       `;
 
-      // Step 2: Extract match metadata
       const metadataMap = extractMatchMetadataFromCompetition(compJson);
       console.log(`[League Table] Extracted metadata for ${metadataMap.size} matches`);
 
-      // Step 3: Filter playable matches
       const playableMatchIds = getPlayableMatchIds(metadataMap);
 
       if (playableMatchIds.length === 0) {
@@ -2568,19 +2657,16 @@
         return;
       }
 
-      // Step 4: Aggregate all matches
       const teamsMap = await aggregateAllMatches(metadataMap, playableMatchIds);
       globalTeamsMap = teamsMap;
       globalMetadataMap = metadataMap;
 
-      // Step 5: Render initial table (with IDs)
       currentTableSort = { column: 'points', asc: false };
       renderLeagueTable(teamsMap);
       document.getElementById('table-wrapper').style.display = 'block';
 
-      setStatus(`Loaded ${teamsMap.size} teams, ${playableMatchIds.length} matches. Loading names...`, 'loading');
+      setStatus(`Loaded ${teamsMap.size} teams. Loading names and ratings...`, 'loading');
 
-      // Step 6: Auto-load all enrichments in parallel
       await autoLoadAllData(teamsMap);
 
     } catch (e) {
@@ -2599,7 +2685,6 @@
     const clearCacheBtn = document.getElementById('clear-cache-btn');
     const downloadBtn = document.getElementById('download-csv-btn');
 
-    // Search input
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value.trim();
 
@@ -2612,7 +2697,6 @@
       const results = filterCompetitions(query);
       renderSuggestions(results);
 
-      // Check if exact ID match
       const exactMatch = allCompetitions.find(c => String(c.id) === query);
       if (exactMatch) {
         selectedCompetitionId = exactMatch.id;
@@ -2624,14 +2708,12 @@
       }
     });
 
-    // Close suggestions when clicking outside
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.search-container')) {
         document.getElementById('suggestions').classList.remove('active');
       }
     });
 
-    // Load button
     loadBtn.addEventListener('click', () => {
       if (selectedCompetitionId) {
         loadCompetitionById(selectedCompetitionId);
@@ -2639,7 +2721,6 @@
       }
     });
 
-    // Enter key to load
     searchInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !loadBtn.disabled) {
         loadCompetitionById(selectedCompetitionId);
@@ -2647,7 +2728,6 @@
       }
     });
 
-    // Clear cache button
     clearCacheBtn.addEventListener('click', () => {
       if (confirm('Clear all cached data? This will remove match data, formations, club names, and player names.')) {
         const success = clearAllCache();
@@ -2660,7 +2740,6 @@
       }
     });
 
-    // Download CSV button
     downloadBtn.addEventListener('click', () => {
       downloadCSV();
     });
@@ -2671,23 +2750,15 @@
   // ============================================================================
   async function initialize() {
     console.log('[MFL League Table] Initializing...');
-
-    // Render favorites
     renderFavorites();
-
-    // Initialize event handlers
     initializeEventHandlers();
-
-    // Fetch competitions list
     await fetchAllCompetitions();
-
     console.log('[MFL League Table] Ready!');
   }
 
-  // Start the application
   initialize();
-})();
 
+})();
   </script>
 </body>
 </html>
