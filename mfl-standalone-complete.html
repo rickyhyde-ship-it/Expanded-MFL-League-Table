@@ -1,0 +1,2693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MFL League Table Analytics</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #0a0e14 0%, #1a1f2e 100%);
+      color: #e5e5e5;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .header {
+      max-width: 1800px;
+      margin: 0 auto 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: #f9fafb;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .header p {
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    .controls {
+      max-width: 1800px;
+      margin: 0 auto 20px;
+      background: rgba(31,41,55,0.8);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .search-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 12px 16px;
+      font-size: 15px;
+      background: rgba(17,24,39,0.9);
+      border: 2px solid #4b5563;
+      border-radius: 8px;
+      color: #e5e5e5;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #fbbf24;
+      box-shadow: 0 0 0 3px rgba(251,191,36,0.1);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      color: #1a1f2e;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(251,191,36,0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(75,85,99,0.8);
+      color: #e5e5e5;
+      border: 1px solid #6b7280;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(107,114,128,0.8);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .suggestions {
+      background: rgba(17,24,39,0.95);
+      border: 1px solid #4b5563;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      position: absolute;
+      z-index: 1000;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .suggestions.active {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(75,85,99,0.3);
+      transition: background 0.15s;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(55,65,81,0.8);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-name {
+      font-weight: 600;
+      color: #fbbf24;
+      margin-bottom: 4px;
+    }
+
+    .suggestion-meta {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .favorites-container {
+      margin-top: 15px;
+    }
+
+    .favorites-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #9ca3af;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .favorites-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .favorite-item {
+      background: rgba(17,24,39,0.9);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #4b5563;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .favorite-item:hover {
+      background: rgba(55,65,81,0.8);
+      border-color: #fbbf24;
+    }
+
+    .favorite-remove {
+      color: #ef4444;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    .favorite-remove:hover {
+      color: #dc2626;
+    }
+
+    .empty-favorites {
+      color: #6b7280;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    .status-container {
+      max-width: 1800px;
+      margin: 0 auto 15px;
+      background: rgba(31,41,55,0.6);
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-align: center;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-text {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .status-text.loading {
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .status-text.success {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .status-text.error {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    .table-wrapper {
+      max-width: 1800px;
+      margin: 0 auto;
+      background: rgba(31,41,55,0.8);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      overflow-x: auto;
+    }
+
+    .competition-header {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(251,191,36,0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .competition-info {
+      flex: 1;
+    }
+
+    .competition-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 5px;
+    }
+
+    .competition-meta {
+      font-size: 13px;
+      color: #9ca3af;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .actions-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .league-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+      font-size: 12px;
+    }
+
+    .league-table th {
+      text-align: center;
+      padding: 10px 8px;
+      color: #9ca3af;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10px;
+      border-bottom: 2px solid rgba(156,163,175,0.3);
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+
+    .league-table th:hover {
+      color: #fbbf24;
+    }
+
+    .league-table th:first-child {
+      text-align: left;
+      padding-left: 12px;
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: rgba(31,41,55,0.95);
+    }
+
+    .sort-indicator {
+      display: inline-block;
+      margin-left: 4px;
+      width: 8px;
+      color: #fbbf24;
+    }
+
+    .team-row {
+      background: rgba(55,65,81,0.6);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .team-row:hover {
+      background: rgba(75,85,99,0.8);
+      transform: translateX(4px);
+    }
+
+    .team-row td {
+      padding: 12px 8px;
+      text-align: center;
+      color: #e5e5e5;
+      white-space: nowrap;
+    }
+
+    .team-row td:first-child {
+      text-align: left;
+      padding-left: 12px;
+      font-weight: 600;
+      color: #fff;
+      border-top-left-radius: 6px;
+      border-bottom-left-radius: 6px;
+      position: sticky;
+      left: 0;
+      background: inherit;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+    }
+
+    .team-row td:last-child {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      font-weight: bold;
+      color: #fbbf24;
+      font-size: 14px;
+    }
+
+    .expanded-row {
+      display: none;
+    }
+
+    .expanded-row.open {
+      display: table-row;
+    }
+
+    .expanded-content {
+      background: rgba(17,24,39,0.8);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .player-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .player-table th,
+    .player-table td {
+      padding: 6px 8px;
+      text-align: right;
+      border-bottom: 1px solid rgba(75,85,99,0.3);
+    }
+
+    .player-table th {
+      font-weight: 700;
+      color: #fbbf24;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .player-table th:first-child,
+    .player-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .match-section {
+      margin-top: 20px;
+    }
+
+    .match-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 12px;
+    }
+
+    .match-table-wrapper {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #eee;
+    }
+
+    .match-table-wrapper table {
+      font-size: 11px;
+    }
+
+    .match-table-wrapper th {
+      color: #9ca3af;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(251,191,36,0.3);
+      border-top-color: #fbbf24;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #9ca3af;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .empty-state-subtext {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+      .search-container {
+        flex-direction: column;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .league-table {
+        font-size: 10px;
+      }
+
+      .league-table th,
+      .league-table td {
+        padding: 8px 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>⚽ MFL League Table Analytics</h1>
+    <p>Advanced statistics and insights for MFL competitions</p>
+  </div>
+
+  <div class="controls">
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="search-input" 
+        class="search-input" 
+        placeholder="Search competitions by name or ID..."
+        autocomplete="off"
+      />
+      <button id="load-btn" class="btn btn-primary" disabled>Load Competition</button>
+      <button id="favorite-btn" class="btn btn-secondary" style="display:none;">⭐ Add to Favorites</button>
+      <button id="clear-cache-btn" class="btn btn-secondary">🗑️ Clear Cache</button>
+      <div id="suggestions" class="suggestions"></div>
+    </div>
+
+    <div class="favorites-container">
+      <div class="favorites-title">
+        <span>⭐</span>
+        <span>Favorite Competitions</span>
+      </div>
+      <div id="favorites-list" class="favorites-list">
+        <span class="empty-favorites">No favorites yet. Load a competition and add it to favorites!</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="status-container" class="status-container">
+    <div id="status" class="status-text">Search for a competition to get started</div>
+  </div>
+
+  <div id="table-wrapper" class="table-wrapper" style="display:none;">
+    <div class="competition-header">
+      <div class="competition-info">
+        <div class="competition-title" id="comp-title"></div>
+        <div class="competition-meta" id="comp-meta"></div>
+      </div>
+      <button id="download-csv-btn" class="btn btn-secondary">📥 Download CSV</button>
+    </div>
+
+    <div id="table-container"></div>
+  </div>
+
+  <script>
+
+// ============================================================================
+// MFL League Table Analytics - Standalone Version
+// ============================================================================
+(function() {
+  'use strict';
+
+  // ============================================================================
+  // LZ-STRING COMPRESSION LIBRARY
+  // ============================================================================
+  const LZString = (function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r){if(!e[r]){e[r]={};for(var o=0;o<r.length;o++)e[r][r.charAt(o)]=o}return e[r]}var i={compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}());
+
+  // ============================================================================
+  // CONSTANTS & GLOBALS
+  // ============================================================================
+  const API_BASE = 'https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod';
+
+  let allCompetitions = [];
+  let selectedCompetitionId = null;
+  let currentCompetitionData = null;
+  let globalTeamsMap = null;
+  let globalMetadataMap = null;
+  let currentTableSort = { column: 'points', asc: false };
+
+  // ============================================================================
+  // HTTP HELPER (using fetch instead of GM_xmlhttpRequest)
+  // ============================================================================
+  const httpGet = async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`GET ${url} → ${response.status}`);
+    }
+    return await response.text();
+  };
+// ============================================================================
+  // CONCURRENCY LIMITER
+  // ============================================================================
+  async function limitConcurrency(tasks, limit = 20) {
+    const results = [];
+    const executing = [];
+
+    for (const [index, task] of tasks.entries()) {
+      const promise = Promise.resolve().then(() => task()).then(result => {
+        results[index] = result;
+        return result;
+      });
+
+      results.push(promise);
+
+      if (limit <= tasks.length) {
+        const executing_promise = promise.then(() => {
+          executing.splice(executing.indexOf(executing_promise), 1);
+        });
+        executing.push(executing_promise);
+
+        if (executing.length >= limit) {
+          await Promise.race(executing);
+        }
+      }
+    }
+
+    await Promise.all(results);
+    return results;
+  }
+
+  // ============================================================================
+  // CACHE MANAGEMENT (Individual Keys + Compression)
+  // ============================================================================
+  const CACHE_VERSION = 'v3_individual';
+  const CACHE_DURATION = 9 * 7 * 24 * 60 * 60 * 1000; // 9 weeks
+  const CACHE_INDEX_KEY = `mfl_cache_index_${CACHE_VERSION}`;
+
+  function getCacheIndex() {
+    try {
+      const json = localStorage.getItem(CACHE_INDEX_KEY);
+      if (!json) return { matches: [], formations: [], clubs: [], players: [], playerNames: [] };
+      const index = JSON.parse(json);
+      if (!index.playerNames) index.playerNames = [];
+      return index;
+    } catch (e) {
+      return { matches: [], formations: [], clubs: [], players: [], playerNames: [] };
+    }
+  }
+
+  function saveCacheIndex(index) {
+    try {
+      localStorage.setItem(CACHE_INDEX_KEY, JSON.stringify(index));
+    } catch (e) {
+      console.warn('[Cache] Failed to save index:', e);
+    }
+  }
+
+  function addToCacheIndex(type, id) {
+    const index = getCacheIndex();
+    if (!index[type].includes(id)) {
+      index[type].push(id);
+      saveCacheIndex(index);
+    }
+  }
+
+  function saveCacheItem(key, data) {
+    try {
+      const cacheData = { data: data, timestamp: Date.now() };
+      const json = JSON.stringify(cacheData);
+      const compressed = LZString.compressToUTF16(json);
+      localStorage.setItem(key, compressed);
+      return true;
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        console.warn('[Cache] Quota exceeded, cleaning up...');
+        cleanupOldCache();
+        try {
+          const cacheData = { data: data, timestamp: Date.now() };
+          const json = JSON.stringify(cacheData);
+          const compressed = LZString.compressToUTF16(json);
+          localStorage.setItem(key, compressed);
+          return true;
+        } catch (e2) {
+          console.error('[Cache] Still failed after cleanup');
+          return false;
+        }
+      }
+      return false;
+    }
+  }
+
+  function getCacheItem(key) {
+    try {
+      const compressed = localStorage.getItem(key);
+      if (!compressed) return null;
+      const decompressed = LZString.decompressFromUTF16(compressed);
+      const cacheData = JSON.parse(decompressed);
+      const age = Date.now() - cacheData.timestamp;
+      if (age > CACHE_DURATION) {
+        localStorage.removeItem(key);
+        return null;
+      }
+      return cacheData.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function getCachedMatch(matchId) {
+    return getCacheItem(`mfl_match_${CACHE_VERSION}_${matchId}`);
+  }
+
+  function saveMatchToCache(matchId, data) {
+    const success = saveCacheItem(`mfl_match_${CACHE_VERSION}_${matchId}`, data);
+    if (success) addToCacheIndex('matches', matchId);
+    return success;
+  }
+
+  function getCachedFormations(matchId) {
+    return getCacheItem(`mfl_formations_${CACHE_VERSION}_${matchId}`);
+  }
+
+  function saveFormationsToCache(matchId, data) {
+    const success = saveCacheItem(`mfl_formations_${CACHE_VERSION}_${matchId}`, data);
+    if (success) addToCacheIndex('formations', matchId);
+    return success;
+  }
+
+  function getCachedClubName(clubId) {
+    return getCacheItem(`mfl_club_${CACHE_VERSION}_${clubId}`);
+  }
+
+  function saveClubNameToCache(clubId, name) {
+    const success = saveCacheItem(`mfl_club_${CACHE_VERSION}_${clubId}`, name);
+    if (success) addToCacheIndex('clubs', clubId);
+    return success;
+  }
+
+  function getCachedPlayerRatings(clubId) {
+    return getCacheItem(`mfl_players_${CACHE_VERSION}_${clubId}`);
+  }
+
+  function savePlayerRatingsToCache(clubId, data) {
+    const success = saveCacheItem(`mfl_players_${CACHE_VERSION}_${clubId}`, data);
+    if (success) addToCacheIndex('players', clubId);
+    return success;
+  }
+
+  function getCachedPlayerName(playerId) {
+    return getCacheItem(`mfl_player_name_${CACHE_VERSION}_${playerId}`);
+  }
+
+  function savePlayerNameToCache(playerId, name) {
+    const success = saveCacheItem(`mfl_player_name_${CACHE_VERSION}_${playerId}`, name);
+    if (success) addToCacheIndex('playerNames', playerId);
+    return success;
+  }
+
+  function cleanupOldCache() {
+    console.log('[Cache] Cleaning up old versions...');
+    ['v1', 'v2_compressed'].forEach(ver => {
+      try {
+        localStorage.removeItem(`mfl_match_cache_${ver}`);
+        localStorage.removeItem(`mfl_formations_cache_${ver}`);
+        localStorage.removeItem(`mfl_cache_index_${ver}`);
+      } catch (e) {}
+    });
+  }
+
+  function clearAllCache() {
+    try {
+      const index = getCacheIndex();
+      let cleared = 0;
+
+      index.matches.forEach(id => {
+        localStorage.removeItem(`mfl_match_${CACHE_VERSION}_${id}`);
+        cleared++;
+      });
+
+      index.formations.forEach(id => {
+        localStorage.removeItem(`mfl_formations_${CACHE_VERSION}_${id}`);
+        cleared++;
+      });
+
+      index.clubs.forEach(id => {
+        localStorage.removeItem(`mfl_club_${CACHE_VERSION}_${id}`);
+        cleared++;
+      });
+
+      index.players.forEach(id => {
+        localStorage.removeItem(`mfl_players_${CACHE_VERSION}_${id}`);
+        cleared++;
+      });
+
+      if (index.playerNames) {
+        index.playerNames.forEach(id => {
+          localStorage.removeItem(`mfl_player_name_${CACHE_VERSION}_${id}`);
+          cleared++;
+        });
+      }
+
+      localStorage.removeItem(CACHE_INDEX_KEY);
+
+      console.log(`[Cache] Cleared ${cleared} items`);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // DATA STRUCTURES
+  // ============================================================================
+  function createTeamAgg(clubId, teamName) {
+    return {
+      clubId,
+      teamName,
+      matchCount: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      points: 0,
+      goalsFor: 0,
+      goalsAgainst: 0,
+      xGFor: 0,
+      xGAgainst: 0,
+      shotsFor: 0,
+      shotsAgainst: 0,
+      sotFor: 0,
+      sotAgainst: 0,
+      possessionSum: 0,
+      possessionAgainstSum: 0,
+      fouls: 0,
+      crosses: 0,
+      crossesAcc: 0,
+      clearances: 0,
+      passes: 0,
+      passesAcc: 0,
+      yellowCards: 0,
+      redCards: 0,
+      matchDetails: [],
+      players: new Map(),
+    };
+  }
+
+  // ============================================================================
+  // PLAYER STATS CONFIGURATION
+  // ============================================================================
+  const PLAYER_COLS = [
+    { id: 'rating', lbl: 'Rat', name: 'Rating', fmt: (v) => v.toFixed(2) },
+    { id: 'goals', lbl: 'G', name: 'Goals', fmt: (v) => v.toFixed(2) },
+    { id: 'assists', lbl: 'A', name: 'Assists', fmt: (v) => v.toFixed(2) },
+    { id: 'xG', lbl: 'xG', name: 'Expected Goals', fmt: (v) => v.toFixed(2) },
+    { id: 'shots', lbl: 'Sh', name: 'Shots', fmt: (v) => v.toFixed(1) },
+    {
+      id: 'sotPct',
+      lbl: 'SoT%',
+      name: 'Shots on Target %',
+      isPct: true,
+      num: 'shotsOnTarget',
+      den: 'shots',
+    },
+    {
+      id: 'chancesCreated',
+      lbl: 'Ch Cr',
+      name: 'Chances Created',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'passes',
+      lbl: 'Pass',
+      name: 'Passes',
+      fmt: (v) => v.toFixed(0),
+    },
+    {
+      id: 'passPct',
+      lbl: 'Pas%',
+      name: 'Pass Accuracy %',
+      isPct: true,
+      num: 'passesAccurate',
+      den: 'passes',
+    },
+    {
+      id: 'crosses',
+      lbl: 'Crs',
+      name: 'Crosses',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'crossPct',
+      lbl: 'Crs%',
+      name: 'Cross Accuracy %',
+      isPct: true,
+      num: 'crossesAccurate',
+      den: 'crosses',
+    },
+    {
+      id: 'dribblingSuccess',
+      lbl: 'Drb S',
+      name: 'Successful Dribbles',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'dribbledPast',
+      lbl: 'WasDrb',
+      name: 'Dribbled Past',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'defDuelPct',
+      lbl: 'DefD%',
+      name: 'Defensive Duel Win %',
+      isPct: true,
+      num: 'defensiveDuelsWon',
+      den: (sums) =>
+        (sums.defensiveDuelsWon || 0) + (sums.dribbledPast || 0),
+    },
+    {
+      id: 'clearances',
+      lbl: 'Clr',
+      name: 'Clearances',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'shotsInterceptions',
+      lbl: 'Blk',
+      name: 'Blocks',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'foulsCommitted',
+      lbl: 'Fls',
+      name: 'Fouls Committed',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'yellowCards',
+      lbl: 'YC',
+      name: 'Yellow Cards',
+      fmt: (v) => v.toFixed(1),
+    },
+    {
+      id: 'redCards',
+      lbl: 'RC',
+      name: 'Red Cards',
+      fmt: (v) => v.toFixed(1),
+    },
+    { id: 'saves', lbl: 'Svs', name: 'Saves', fmt: (v) => v.toFixed(1) },
+    {
+      id: 'goalsConceded',
+      lbl: 'GC',
+      name: 'Goals Conceded',
+      fmt: (v) => v.toFixed(1),
+    },
+  ];
+
+  // ============================================================================
+  // STEP 1: EXTRACT MATCH METADATA FROM COMPETITION JSON
+  // ============================================================================
+  function extractMatchMetadataFromCompetition(competitionJson) {
+    const metadata = new Map();
+
+    const walk = (node) => {
+      if (!node || typeof node !== 'object') return;
+      if (Array.isArray(node)) {
+        node.forEach(walk);
+        return;
+      }
+
+      // Check if this node is a match with the required data
+      if (node.matchId && node.status) {
+        const id = String(node.matchId);
+        metadata.set(id, {
+          matchId: id,
+          status: node.status,
+          homeClubId: node.homeClubId ? String(node.homeClubId) : null,
+          awayClubId: node.awayClubId ? String(node.awayClubId) : null,
+          homeScore: typeof node.homeScore === 'number' ? node.homeScore : null,
+          awayScore: typeof node.awayScore === 'number' ? node.awayScore : null,
+          startDate: node.startDate || node.kickoffTime || null,
+        });
+      }
+
+      // Continue walking
+      Object.values(node).forEach(walk);
+    };
+
+    walk(competitionJson);
+    return metadata;
+  }
+
+  // ============================================================================
+  // STEP 2: FILTER PLAYABLE MATCHES
+  // ============================================================================
+  function getPlayableMatchIds(metadataMap) {
+    const playable = [];
+
+    for (const [matchId, meta] of metadataMap) {
+      if (meta.status === 'ENDED' || meta.status === 'FORFEITED') {
+        playable.push(matchId);
+      }
+    }
+
+    console.log(`[League Table] Found ${playable.length} playable matches (ENDED or FORFEITED)`);
+    return playable;
+  }
+
+  // ============================================================================
+  // STEP 3: FETCH MATCH ENRICHMENT DATA
+  // ============================================================================
+  async function fetchMatchEnrichment(matchId) {
+    const cached = getCachedMatch(matchId);
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const reportText = await httpGet(`${API_BASE}/matches/${matchId}/report`).catch(() => null);
+
+      let report = null;
+      if (reportText) {
+        try {
+          const parsed = JSON.parse(reportText);
+          if (parsed.key !== 'matches.notFound') {
+            report = parsed;
+          }
+        } catch (e) {
+          console.warn(`[Match ${matchId}] Report parse error:`, e);
+        }
+      }
+
+      const result = { report, formations: null };
+      saveMatchToCache(matchId, result);
+      return result;
+    } catch (e) {
+      console.error(`[Match ${matchId}] Fetch error:`, e);
+      return { report: null, formations: null };
+    }
+  }
+
+  async function fetchMatchFormations(matchId) {
+    const cached = getCachedFormations(matchId);
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const formationsText = await httpGet(`${API_BASE}/matches/${matchId}?withFormations=true`).catch(() => null);
+
+      let formations = null;
+      if (formationsText) {
+        try {
+          formations = JSON.parse(formationsText);
+        } catch (e) {
+          console.warn(`[Match ${matchId}] Formations parse error:`, e);
+        }
+      }
+
+      if (formations) {
+        saveFormationsToCache(matchId, formations);
+      }
+
+      return formations;
+    } catch (e) {
+      console.error(`[Match ${matchId}] Formations fetch error:`, e);
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // STEP 4: PARSE OWN GOALS FROM goalsTimes
+  // ============================================================================
+  function parseGoalsTimes(goalsTimes) {
+    if (!goalsTimes) return { normal: 0, ownGoals: 0 };
+
+    const str = String(goalsTimes).trim();
+    if (!str) return { normal: 0, ownGoals: 0 };
+
+    const tokens = str.split(',');
+    let normal = 0;
+    let ownGoals = 0;
+
+    tokens.forEach((token) => {
+      const t = token.trim();
+      if (!t) return;
+      if (/OG/i.test(t)) {
+        ownGoals++;
+      } else {
+        normal++;
+      }
+    });
+
+    return { normal, ownGoals };
+  }
+
+  // ============================================================================
+  // STEP 5: EXTRACT PLAYER MAP FROM FORMATIONS
+  // ============================================================================
+  function extractPlayerMapFromFormations(formationsJson) {
+    if (!formationsJson) return {};
+
+    const playerMap = {};
+
+    const scanFormation = (formation) => {
+      if (!formation || !Array.isArray(formation.positions)) return;
+
+      formation.positions.forEach((pos) => {
+        const p = pos?.player;
+        if (!p || !p.id) return;
+
+        const id = String(p.id);
+        const firstName = p.firstName || p.metadata?.firstName || '';
+        const lastName = p.lastName || p.metadata?.lastName || '';
+        const name = `${firstName} ${lastName}`.trim() || `Player ${id}`;
+        const positions = p.positions || p.metadata?.positions || [];
+        const overall = p.overall || p.metadata?.overallAtKickoff || p.metadata?.overall || 0;
+
+        playerMap[id] = {
+          name,
+          positions: Array.isArray(positions) ? positions : [],
+          matchOverall: overall,
+        };
+      });
+    };
+
+    scanFormation(formationsJson.homeFormation);
+    scanFormation(formationsJson.awayFormation);
+
+    return playerMap;
+  }
+
+  // ============================================================================
+  // STEP 6: COMPUTE XI OVERALL
+  // ============================================================================
+  function computeXIOverall(formation, playerMap) {
+    if (!formation || !Array.isArray(formation.positions)) return 0;
+
+    const players = formation.positions
+      .map((pos) => pos?.player)
+      .filter((p) => p && p.id);
+
+    if (players.length === 0) return 0;
+
+    const ratings = players.map((p) => {
+      const id = String(p.id);
+      const meta = playerMap[id];
+      if (meta && typeof meta.matchOverall === 'number') {
+        return meta.matchOverall;
+      }
+      return p.overall || p.metadata?.overallAtKickoff || p.metadata?.overall || 0;
+    });
+
+    const sum = ratings.reduce((acc, r) => acc + r, 0);
+    return ratings.length > 0 ? sum / ratings.length : 0;
+  }
+
+  // ============================================================================
+  // STEP 7: AGGREGATE SINGLE MATCH
+  // ============================================================================
+  function aggregateSingleMatch(matchMeta, enrichment, teamsMap) {
+    const { matchId, homeClubId, awayClubId, homeScore, awayScore, startDate, status } = matchMeta;
+    const { report, formations } = enrichment;
+
+    // Extract player map (empty if formations not loaded)
+    const playerMap = formations ? extractPlayerMapFromFormations(formations) : {};
+
+    // Get formations and XI overalls (0 if not loaded)
+    const homeFormation = formations?.homeFormation || {};
+    const awayFormation = formations?.awayFormation || {};
+    const homeFormationType = homeFormation.type || '';
+    const awayFormationType = awayFormation.type || '';
+    const homeXIOverall = formations ? computeXIOverall(homeFormation, playerMap) : 0;
+    const awayXIOverall = formations ? computeXIOverall(awayFormation, playerMap) : 0;
+
+    // Determine if we have detailed stats or just scores
+    const hasDetailedStats = report && report.home && report.away;
+
+    let homeStats, awayStats, homePoss, awayPoss;
+
+    if (hasDetailedStats) {
+      // Full stats available
+      const calcSideStats = (sideKey) => {
+        const sideData = report[sideKey];
+        if (!sideData?.playersStats) return null;
+
+        return sideData.playersStats.reduce((acc, p) => {
+          const { normal, ownGoals } = parseGoalsTimes(p.goalsTimes);
+          const totalGoals = (normal + ownGoals) || p.goals || 0;
+
+          return {
+            goals: acc.goals + (totalGoals - ownGoals),
+            ownGoals: acc.ownGoals + ownGoals,
+            xG: acc.xG + (p.xG || 0),
+            shots: acc.shots + (p.shots || 0),
+            sot: acc.sot + (p.shotsOnTarget || 0),
+            passes: acc.passes + (p.passes || 0),
+            passesAcc: acc.passesAcc + (p.passesAccurate || 0),
+            fouls: acc.fouls + (p.foulsCommitted || 0),
+            crosses: acc.crosses + (p.crosses || 0),
+            crossesAcc: acc.crossesAcc + (p.crossesAccurate || 0),
+            clearances: acc.clearances + (p.clearances || 0),
+            yc: acc.yc + (p.yellowCards || 0),
+            rc: acc.rc + (p.redCards || 0),
+          };
+        }, {
+          goals: 0,
+          ownGoals: 0,
+          xG: 0,
+          shots: 0,
+          sot: 0,
+          passes: 0,
+          passesAcc: 0,
+          fouls: 0,
+          crosses: 0,
+          crossesAcc: 0,
+          clearances: 0,
+          yc: 0,
+          rc: 0,
+        });
+      };
+
+      homeStats = calcSideStats('home');
+      awayStats = calcSideStats('away');
+
+      if (!homeStats || !awayStats) {
+        console.warn(`[Match ${matchId}] Invalid stats structure, skipping`);
+        return;
+      }
+
+      // Adjust goals for own goals
+      homeStats.goals += awayStats.ownGoals;
+      awayStats.goals += homeStats.ownGoals;
+
+      // Calculate possession
+      const totalPasses = homeStats.passes + awayStats.passes;
+      homePoss = totalPasses > 0 ? (homeStats.passes / totalPasses) * 100 : 50;
+      awayPoss = 100 - homePoss;
+
+    } else {
+      // Forfeited or missing report - use competition scores only
+      console.log(`[Match ${matchId}] No detailed stats, using competition scores: ${homeScore} - ${awayScore}`);
+
+      homeStats = {
+        goals: homeScore || 0,
+        ownGoals: 0,
+        xG: 0,
+        shots: 0,
+        sot: 0,
+        passes: 0,
+        passesAcc: 0,
+        fouls: 0,
+        crosses: 0,
+        crossesAcc: 0,
+        clearances: 0,
+        yc: 0,
+        rc: 0,
+      };
+
+      awayStats = {
+        goals: awayScore || 0,
+        ownGoals: 0,
+        xG: 0,
+        shots: 0,
+        sot: 0,
+        passes: 0,
+        passesAcc: 0,
+        fouls: 0,
+        crosses: 0,
+        crossesAcc: 0,
+        clearances: 0,
+        yc: 0,
+        rc: 0,
+      };
+
+      homePoss = 50;
+      awayPoss = 50;
+    }
+
+    // Determine match result
+    const homeGoals = homeStats.goals;
+    const awayGoals = awayStats.goals;
+    let homeResult, awayResult, homePoints, awayPoints;
+
+    if (homeGoals > awayGoals) {
+      homeResult = 'W';
+      awayResult = 'L';
+      homePoints = 3;
+      awayPoints = 0;
+    } else if (homeGoals < awayGoals) {
+      homeResult = 'L';
+      awayResult = 'W';
+      homePoints = 0;
+      awayPoints = 3;
+    } else {
+      homeResult = 'D';
+      awayResult = 'D';
+      homePoints = 1;
+      awayPoints = 1;
+    }
+
+    // Update teams
+    const updateTeam = (clubId, stats, oppStats, poss, oppPoss, result, points, homeAway, oppClubId, xiOverall, formation, oppXI, oppFormation, sideKey) => {
+      if (!clubId) {
+        console.warn(`[Match ${matchId}] Missing club ID for ${sideKey}, skipping`);
+        return;
+      }
+
+      let team = teamsMap.get(clubId);
+      if (!team) {
+        team = createTeamAgg(clubId, clubId); // Will update name later if available
+        teamsMap.set(clubId, team);
+      }
+
+      team.matchCount++;
+      if (result === 'W') team.wins++;
+      if (result === 'D') team.draws++;
+      if (result === 'L') team.losses++;
+      team.points += points;
+
+      team.goalsFor += stats.goals;
+      team.goalsAgainst += oppStats.goals;
+      team.xGFor += stats.xG;
+      team.xGAgainst += oppStats.xG;
+      team.shotsFor += stats.shots;
+      team.shotsAgainst += oppStats.shots;
+      team.sotFor += stats.sot;
+      team.sotAgainst += oppStats.sot;
+      team.possessionSum += poss;
+      team.possessionAgainstSum += oppPoss;
+      team.fouls += stats.fouls;
+      team.crosses += stats.crosses;
+      team.crossesAcc += stats.crossesAcc;
+      team.clearances += stats.clearances;
+      team.passes += stats.passes;
+      team.passesAcc += stats.passesAcc;
+      team.yellowCards += stats.yc;
+      team.redCards += stats.rc;
+
+      // Find top chance creators for this match
+      let topChanceCreator = { name: '—', chances: 0 };
+      if (hasDetailedStats && report[sideKey]?.playersStats) {
+        report[sideKey].playersStats.forEach((ps) => {
+          const chances = ps.chancesCreated || 0;
+          if (chances > topChanceCreator.chances) {
+            const pid = String(ps.playerId);
+            const playerInfo = playerMap[pid];
+            topChanceCreator = {
+              name: playerInfo?.name || `Player ${pid}`,
+              chances: chances,
+            };
+          }
+        });
+      }
+
+      const oppSideKey = sideKey === 'home' ? 'away' : 'home';
+      let oppTopChanceCreator = { name: '—', chances: 0 };
+      if (hasDetailedStats && report[oppSideKey]?.playersStats) {
+        report[oppSideKey].playersStats.forEach((ps) => {
+          const chances = ps.chancesCreated || 0;
+          if (chances > oppTopChanceCreator.chances) {
+            const pid = String(ps.playerId);
+            const playerInfo = playerMap[pid];
+            oppTopChanceCreator = {
+              name: playerInfo?.name || `Player ${pid}`,
+              chances: chances,
+            };
+          }
+        });
+      }
+
+      team.matchDetails.push({
+        matchId,
+        date: startDate,
+        homeAway,
+        opponentClubId: oppClubId,
+        scoreFor: stats.goals,
+        scoreAgainst: oppStats.goals,
+        xGFor: stats.xG,
+        xGAgainst: oppStats.xG,
+        shotsFor: stats.shots,
+        shotsAgainst: oppStats.shots,
+        sotFor: stats.sot,
+        sotAgainst: oppStats.sot,
+        possFor: poss,
+        possAgainst: oppPoss,
+        formation: formation,
+        xiOverall: xiOverall,
+        oppXiOverall: oppXI,
+        oppFormation: oppFormation,
+        topChanceCreator: topChanceCreator,
+        oppTopChanceCreator: oppTopChanceCreator,
+      });
+
+      // Update player stats only if we have detailed report
+      if (hasDetailedStats && report[sideKey]?.playersStats) {
+        report[sideKey].playersStats.forEach((ps) => {
+          if (!ps.playerId) return;
+
+          const pid = String(ps.playerId);
+          let playerRec = team.players.get(pid);
+          const playerMeta = playerMap[pid];
+
+          if (!playerRec) {
+            const name = playerMeta?.name || `Player ${pid}`;
+            const positions = new Set(playerMeta?.positions || []);
+            playerRec = {
+              playerId: pid,
+              name,
+              positions,
+              appearances: 0,
+              sums: {},
+            };
+            team.players.set(pid, playerRec);
+          } else if (playerMeta) {
+            // Update name if better one available
+            if (playerRec.name.startsWith('Player ') && !playerMeta.name.startsWith('Player ')) {
+              playerRec.name = playerMeta.name;
+            }
+            // Add positions
+            (playerMeta.positions || []).forEach((pos) => playerRec.positions.add(pos));
+          }
+
+          playerRec.appearances++;
+
+          // Sum all numeric stats
+          for (const [key, val] of Object.entries(ps)) {
+            if (typeof val === 'number' && Number.isFinite(val)) {
+              playerRec.sums[key] = (playerRec.sums[key] || 0) + val;
+            }
+          }
+        });
+      }
+    };
+
+    updateTeam(
+      homeClubId,
+      homeStats,
+      awayStats,
+      homePoss,
+      awayPoss,
+      homeResult,
+      homePoints,
+      'H',
+      awayClubId,
+      homeXIOverall,
+      homeFormationType,
+      awayXIOverall,
+      awayFormationType,
+      'home'
+    );
+
+    updateTeam(
+      awayClubId,
+      awayStats,
+      homeStats,
+      awayPoss,
+      homePoss,
+      awayResult,
+      awayPoints,
+      'A',
+      homeClubId,
+      awayXIOverall,
+      awayFormationType,
+      homeXIOverall,
+      homeFormationType,
+      'away'
+    );
+  }
+
+  // ============================================================================
+  // STEP 8: AGGREGATE ALL MATCHES
+  // ============================================================================
+  async function aggregateAllMatches(metadataMap, playableMatchIds) {
+    const teamsMap = new Map();
+
+    const cached = playableMatchIds.filter(id => getCachedMatch(id) !== null).length;
+    const toFetch = playableMatchIds.length - cached;
+
+    setStatus(`Matches: ${playableMatchIds.length} total, ${cached} cached, ${toFetch} to fetch...`);
+
+    let completed = 0;
+    const enrichmentTasks = playableMatchIds.map((id) => async () => {
+      const result = await fetchMatchEnrichment(id);
+      completed++;
+      if (completed % 10 === 0 || completed === playableMatchIds.length) {
+        setStatus(`Fetching: ${completed}/${playableMatchIds.length} matches`);
+      }
+      return result;
+    });
+
+    const enrichments = await limitConcurrency(enrichmentTasks, 20);
+
+    setStatus('Aggregating match data...');
+
+    // Process each match
+    playableMatchIds.forEach((matchId, idx) => {
+      const meta = metadataMap.get(matchId);
+      const enrichment = enrichments[idx];
+
+      if (!meta) {
+        console.warn(`[Match ${matchId}] No metadata found, skipping`);
+        return;
+      }
+
+      try {
+        aggregateSingleMatch(meta, enrichment, teamsMap);
+      } catch (e) {
+        console.error(`[Match ${matchId}] Aggregation error:`, e);
+      }
+    });
+
+    console.log(`[League Table] Aggregated ${teamsMap.size} teams from ${playableMatchIds.length} matches`);
+    return teamsMap;
+  }
+
+
+  // ============================================================================
+  // LAZY LOAD FORMATIONS FOR TEAM
+  // ============================================================================
+  async function loadFormationsForTeam(team, metadataMap) {
+    const matchIds = team.matchDetails.map(m => m.matchId);
+
+    const formationTasks = matchIds.map(matchId => () => fetchMatchFormations(matchId));
+    const formations = await limitConcurrency(formationTasks, 20);
+
+    matchIds.forEach((matchId, idx) => {
+      const formationsData = formations[idx];
+      if (!formationsData) return;
+
+      const matchDetail = team.matchDetails.find(m => m.matchId === matchId);
+      if (!matchDetail) return;
+
+      const playerMap = extractPlayerMapFromFormations(formationsData);
+      const homeFormation = formationsData.homeFormation || {};
+      const awayFormation = formationsData.awayFormation || {};
+
+      const meta = metadataMap.get(matchId);
+      if (!meta) return;
+
+      const isHome = meta.homeClubId === team.clubId;
+      const teamFormation = isHome ? homeFormation : awayFormation;
+      const oppFormation = isHome ? awayFormation : homeFormation;
+
+      matchDetail.formation = teamFormation.type || matchDetail.formation;
+      matchDetail.xiOverall = computeXIOverall(teamFormation, playerMap) || matchDetail.xiOverall;
+      matchDetail.oppFormation = oppFormation.type || matchDetail.oppFormation;
+      matchDetail.oppXiOverall = computeXIOverall(oppFormation, playerMap) || matchDetail.oppXiOverall;
+    });
+  }
+
+  // ============================================================================
+  // CACHED ENRICHMENT FUNCTIONS
+  // ============================================================================
+  async function fetchClubName(clubId) {
+    const cached = getCachedClubName(clubId);
+    if (cached) return { clubId, name: cached };
+
+    try {
+      const response = await httpGet(`${API_BASE}/clubs/${clubId}`);
+      const clubData = JSON.parse(response);
+      const name = clubData.name || clubId;
+      saveClubNameToCache(clubId, name);
+      return { clubId, name };
+    } catch (e) {
+      console.warn(`[Club ${clubId}] Failed to fetch name:`, e);
+      return { clubId, name: clubId };
+    }
+  }
+
+  async function enrichTeamNames(teamsMap) {
+    setStatus(`Fetching club names for ${teamsMap.size} teams...`);
+    const clubIds = [...teamsMap.keys()];
+
+    const cached = clubIds.filter(id => getCachedClubName(id)).length;
+    console.log(`[Clubs] ${cached}/${clubIds.length} cached`);
+
+    const nameTasks = clubIds.map((clubId) => () => fetchClubName(clubId));
+    const results = await limitConcurrency(nameTasks, 20);
+
+    results.forEach(({ clubId, name }) => {
+      const team = teamsMap.get(clubId);
+      if (team) team.teamName = name;
+    });
+
+    console.log(`[League Table] Enriched ${results.length} team names`);
+    setStatus(`Complete! Loaded club names.`);
+    renderLeagueTable(teamsMap);
+  }
+
+  async function fetchClubPlayers(clubId) {
+    const cached = getCachedPlayerRatings(clubId);
+    if (cached) return { clubId, overalls: cached };
+
+    try {
+      const response = await httpGet(`${API_BASE}/clubs/${clubId}/players`);
+
+      const overallRegex = /"overall":(\d+)/g;
+      const overallValues = [];
+      let match;
+
+      while ((match = overallRegex.exec(response)) !== null) {
+        overallValues.push(parseInt(match[1], 10));
+      }
+
+      overallValues.sort((a, b) => b - a);
+
+      const top11 = overallValues.slice(0, 11);
+      const top16 = overallValues.slice(0, 16);
+
+      const avg11 = top11.length > 0 ? top11.reduce((sum, val) => sum + val, 0) / top11.length : 0;
+      const avg16 = top16.length > 0 ? top16.reduce((sum, val) => sum + val, 0) / top16.length : 0;
+      const avgAll = overallValues.length > 0 ? overallValues.reduce((sum, val) => sum + val, 0) / overallValues.length : 0;
+
+      const overalls = { avg11, avg16, avgAll };
+      savePlayerRatingsToCache(clubId, overalls);
+      return { clubId, overalls };
+    } catch (e) {
+      console.warn(`[Club ${clubId}] Failed to fetch players:`, e);
+      return { clubId, overalls: { avg11: 0, avg16: 0, avgAll: 0 } };
+    }
+  }
+
+  async function enrichPlayerOveralls(teamsMap) {
+    setStatus(`Fetching player ratings for ${teamsMap.size} teams...`);
+    const clubIds = [...teamsMap.keys()];
+
+    const cached = clubIds.filter(id => getCachedPlayerRatings(id)).length;
+    console.log(`[Players] ${cached}/${clubIds.length} cached`);
+
+    const overallTasks = clubIds.map((clubId) => () => fetchClubPlayers(clubId));
+    const results = await limitConcurrency(overallTasks, 20);
+
+    results.forEach(({ clubId, overalls }) => {
+      const team = teamsMap.get(clubId);
+      if (team) {
+        team.overallAvg11 = overalls.avg11;
+        team.overallAvg16 = overalls.avg16;
+        team.overallAvgAll = overalls.avgAll;
+      }
+    });
+
+    console.log(`[League Table] Enriched ${results.length} teams with player ratings`);
+    setStatus(`Complete! Loaded player ratings.`);
+    renderLeagueTable(teamsMap);
+  }
+
+  function collectAllPlayerIds(teamsMap) {
+    const playerIds = new Set();
+    for (const team of teamsMap.values()) {
+      for (const [playerId, playerRec] of team.players.entries()) {
+        if (!playerRec.name || playerRec.name.startsWith('Player ')) {
+          playerIds.add(playerId);
+        }
+      }
+    }
+    return [...playerIds];
+  }
+
+  async function enrichPlayerNames(teamsMap) {
+    if (!teamsMap) {
+      alert('Data not ready. Please wait for initial load.');
+      return;
+    }
+
+    setStatus('Collecting player IDs...');
+
+    const playerIds = collectAllPlayerIds(teamsMap);
+
+    if (playerIds.length === 0) {
+      setStatus('All players already have names!');
+      setTimeout(() => setStatus('Complete!'), 2000);
+      return;
+    }
+
+    // Check cache first
+    let cachedCount = 0;
+    const playerIdToName = {};
+
+    playerIds.forEach(pid => {
+      const cached = getCachedPlayerName(pid);
+      if (cached) {
+        playerIdToName[pid] = cached;
+        cachedCount++;
+      }
+    });
+
+    console.log(`[Player Names] ${cachedCount}/${playerIds.length} cached`);
+
+    // Get all unique club IDs  
+    const clubIds = [...teamsMap.keys()];
+    setStatus(`Fetching player names from ${clubIds.length} clubs...`);
+
+    // Fetch club players (uses same API as "Load Player Ratings")
+    let loadedClubs = 0;
+    const clubPlayerTasks = clubIds.map(clubId => async () => {
+      try {
+        const response = await httpGet(`${API_BASE}/clubs/${clubId}/players`);
+        const players = JSON.parse(response);
+
+        loadedClubs++;
+        if (loadedClubs % 5 === 0 || loadedClubs === clubIds.length) {
+          setStatus(`Loading players: ${loadedClubs}/${clubIds.length} clubs`);
+        }
+
+        return { clubId, players };
+      } catch (e) {
+        console.warn(`[Club ${clubId}] Failed to fetch players:`, e);
+        return { clubId, players: [] };
+      }
+    });
+
+    const clubPlayersResults = await limitConcurrency(clubPlayerTasks, 20);
+
+    setStatus('Extracting player names...');
+
+    // Extract player names from club rosters
+    clubPlayersResults.forEach(({ clubId, players }) => {
+      if (!players || !Array.isArray(players)) return;
+
+      players.forEach(player => {
+        if (!player || !player.id) return;
+
+        const pid = String(player.id);
+        const meta = player.metadata || {};
+        const firstName = meta.firstName || '';
+        const lastName = meta.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+
+        if (fullName && !fullName.startsWith('Player ')) {
+          playerIdToName[pid] = fullName;
+          savePlayerNameToCache(pid, fullName);
+        }
+      });
+    });
+
+    setStatus('Updating player records...');
+
+    // Update all player records
+    let updatedCount = 0;
+    for (const team of teamsMap.values()) {
+      for (const [playerId, playerRec] of team.players.entries()) {
+        if (playerIdToName[playerId]) {
+          playerRec.name = playerIdToName[playerId];
+          updatedCount++;
+        }
+      }
+
+      // Update top chance creators
+      for (const match of team.matchDetails) {
+        if (match.topChanceCreator && match.topChanceCreator.name.startsWith('Player ')) {
+          const pid = match.topChanceCreator.name.replace('Player ', '');
+          if (playerIdToName[pid]) {
+            match.topChanceCreator.name = playerIdToName[pid];
+          }
+        }
+
+        if (match.oppTopChanceCreator && match.oppTopChanceCreator.name.startsWith('Player ')) {
+          const pid = match.oppTopChanceCreator.name.replace('Player ', '');
+          if (playerIdToName[pid]) {
+            match.oppTopChanceCreator.name = playerIdToName[pid];
+          }
+        }
+      }
+    }
+
+    console.log(`[Player Names] Updated ${updatedCount} player records`);
+    setStatus(`Complete! Loaded ${updatedCount} player names.`);
+
+    renderLeagueTable(teamsMap);
+  }
+
+
+  
+  function setStatus(msg, type = 'loading') {
+    const el = document.getElementById('status');
+    if (el) {
+      el.textContent = msg;
+      el.className = 'status-text ' + type;
+    }
+  }
+// ============================================================================
+  // UI: SORT TEAMS
+  // ============================================================================
+  function sortTeams(teamsMap) {
+    const teams = [...teamsMap.values()];
+    const col = currentTableSort.column;
+    const asc = currentTableSort.asc;
+
+    teams.sort((a, b) => {
+      let valA, valB;
+
+      const mc = (t) => t.matchCount || 1;
+
+      switch (col) {
+        case 'team':
+          valA = a.teamName.toLowerCase();
+          valB = b.teamName.toLowerCase();
+          break;
+        case 'mp':
+          valA = a.matchCount;
+          valB = b.matchCount;
+          break;
+        case 'w':
+          valA = a.wins;
+          valB = b.wins;
+          break;
+        case 'd':
+          valA = a.draws;
+          valB = b.draws;
+          break;
+        case 'l':
+          valA = a.losses;
+          valB = b.losses;
+          break;
+        case 'gf':
+          valA = a.goalsFor;
+          valB = b.goalsFor;
+          break;
+        case 'ga':
+          valA = a.goalsAgainst;
+          valB = b.goalsAgainst;
+          break;
+        case 'gd':
+          valA = a.goalsFor - a.goalsAgainst;
+          valB = b.goalsFor - b.goalsAgainst;
+          break;
+        case 'avxg':
+          valA = a.xGFor / mc(a);
+          valB = b.xGFor / mc(b);
+          break;
+        case 'avxga':
+          valA = a.xGAgainst / mc(a);
+          valB = b.xGAgainst / mc(b);
+          break;
+        case 'avposs':
+          valA = a.possessionSum / mc(a);
+          valB = b.possessionSum / mc(b);
+          break;
+        case 'avsh':
+          valA = a.shotsFor / mc(a);
+          valB = b.shotsFor / mc(b);
+          break;
+        case 'avsha':
+          valA = a.shotsAgainst / mc(a);
+          valB = b.shotsAgainst / mc(b);
+          break;
+        case 'avsot':
+          valA = a.sotFor / mc(a);
+          valB = b.sotFor / mc(b);
+          break;
+        case 'avsota':
+          valA = a.sotAgainst / mc(a);
+          valB = b.sotAgainst / mc(b);
+          break;
+        case 'avfls':
+          valA = a.fouls / mc(a);
+          valB = b.fouls / mc(b);
+          break;
+        case 'avcrs':
+          valA = a.crosses / mc(a);
+          valB = b.crosses / mc(b);
+          break;
+        case 'crspct':
+          valA = a.crosses > 0 ? (a.crossesAcc / a.crosses) * 100 : 0;
+          valB = b.crosses > 0 ? (b.crossesAcc / b.crosses) * 100 : 0;
+          break;
+        case 'avclr':
+          valA = a.clearances / mc(a);
+          valB = b.clearances / mc(b);
+          break;
+        case 'paspct':
+          valA = a.passes > 0 ? (a.passesAcc / a.passes) * 100 : 0;
+          valB = b.passes > 0 ? (b.passesAcc / b.passes) * 100 : 0;
+          break;
+        case 'avyc':
+          valA = a.yellowCards / mc(a);
+          valB = b.yellowCards / mc(b);
+          break;
+        case 'avrc':
+          valA = a.redCards / mc(a);
+          valB = b.redCards / mc(b);
+          break;
+        case 'ovr11':
+          valA = a.overallAvg11 || 0;
+          valB = b.overallAvg11 || 0;
+          break;
+        case 'ovr16':
+          valA = a.overallAvg16 || 0;
+          valB = b.overallAvg16 || 0;
+          break;
+        case 'ovrall':
+          valA = a.overallAvgAll || 0;
+          valB = b.overallAvgAll || 0;
+          break;
+        case 'points':
+        default:
+          valA = a.points;
+          valB = b.points;
+          break;
+      }
+
+      if (typeof valA === 'string') {
+        const cmp = valA.localeCompare(valB);
+        if (cmp !== 0) return asc ? cmp : -cmp;
+      } else {
+        if (valA !== valB) return asc ? valA - valB : valB - valA;
+      }
+
+      // Tiebreakers
+      if (a.points !== b.points) return b.points - a.points;
+      const gdA = a.goalsFor - a.goalsAgainst;
+      const gdB = b.goalsFor - b.goalsAgainst;
+      if (gdA !== gdB) return gdB - gdA;
+      return b.goalsFor - a.goalsFor;
+    });
+
+    return teams;
+  }
+
+  // ============================================================================
+  // UI: RENDER LEAGUE TABLE
+  // ============================================================================
+  function renderLeagueTable(teamsMap) {
+    const container = document.getElementById('mfl-table-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Calculate static positions
+    const teamsByPoints = [...teamsMap.values()];
+    teamsByPoints.sort((a, b) => {
+      if (a.points !== b.points) return b.points - a.points;
+      const gdA = a.goalsFor - a.goalsAgainst;
+      const gdB = b.goalsFor - b.goalsAgainst;
+      if (gdA !== gdB) return gdB - gdA;
+      return b.goalsFor - a.goalsFor;
+    });
+    teamsByPoints.forEach((team, idx) => {
+      team.leaguePosition = idx + 1;
+    });
+
+    const teams = sortTeams(teamsMap);
+
+    const table = document.createElement('table');
+    table.className = 'league-table';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th data-col="team" style="min-width: 200px;">Team</th>
+        <th data-col="mp">MP</th>
+        <th data-col="w">W</th>
+        <th data-col="d">D</th>
+        <th data-col="l">L</th>
+        <th data-col="gf">GF</th>
+        <th data-col="ga">GA</th>
+        <th data-col="gd">GD</th>
+        <th data-col="avxg" title="Average xG For">Av xG</th>
+        <th data-col="avxga" title="Average xG Against">Av xGA</th>
+        <th data-col="avposs" title="Average Possession">Av Poss</th>
+        <th data-col="avsh" title="Average Shots For">Av Sh</th>
+        <th data-col="avsha" title="Average Shots Against">Av ShA</th>
+        <th data-col="avsot" title="Average Shots on Target">Av SoT</th>
+        <th data-col="avsota" title="Average Shots on Target Against">Av SoTA</th>
+        <th data-col="avfls" title="Average Fouls Committed">Av Fls</th>
+        <th data-col="avcrs" title="Average Crosses">Av Crs</th>
+        <th data-col="crspct" title="Average Cross Accuracy">Crs%</th>
+        <th data-col="avclr" title="Average Clearances">Av Clr</th>
+        <th data-col="paspct" title="Average Pass Accuracy">Pas%</th>
+        <th data-col="avyc" title="Average Yellow Cards">Av YC</th>
+        <th data-col="avrc" title="Average Red Cards">Av RC</th>
+        <th data-col="ovr11" title="Top 11 Overall">Top 11 OVR</th>
+        <th data-col="ovr16" title="Top 16 Overall">Top 16 OVR</th>
+        <th data-col="ovrall" title="All Players Overall">All OVR</th>
+        <th data-col="points" style="min-width: 40px;">Pts</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    teams.forEach((team, idx) => {
+      const mc = team.matchCount || 1;
+      const gd = team.goalsFor - team.goalsAgainst;
+      const poss = (team.possessionSum / mc).toFixed(0);
+      const passPct = team.passes > 0 ? ((team.passesAcc / team.passes) * 100).toFixed(0) : 0;
+      const crossPct = team.crosses > 0 ? ((team.crossesAcc / team.crosses) * 100).toFixed(0) : 0;
+
+      const tr = document.createElement('tr');
+      tr.className = 'team-row';
+      tr.innerHTML = `
+        <td>${team.leaguePosition}. ${team.teamName}</td>
+        <td>${team.matchCount}</td>
+        <td>${team.wins}</td>
+        <td>${team.draws}</td>
+        <td>${team.losses}</td>
+        <td>${team.goalsFor}</td>
+        <td>${team.goalsAgainst}</td>
+        <td>${gd > 0 ? '+' + gd : gd}</td>
+        <td>${(team.xGFor / mc).toFixed(2)}</td>
+        <td>${(team.xGAgainst / mc).toFixed(2)}</td>
+        <td>${poss}%</td>
+        <td>${(team.shotsFor / mc).toFixed(2)}</td>
+        <td>${(team.shotsAgainst / mc).toFixed(2)}</td>
+        <td>${(team.sotFor / mc).toFixed(2)}</td>
+        <td>${(team.sotAgainst / mc).toFixed(2)}</td>
+        <td>${(team.fouls / mc).toFixed(2)}</td>
+        <td>${(team.crosses / mc).toFixed(2)}</td>
+        <td>${crossPct}%</td>
+        <td>${(team.clearances / mc).toFixed(2)}</td>
+        <td>${passPct}%</td>
+        <td>${(team.yellowCards / mc).toFixed(2)}</td>
+        <td>${(team.redCards / mc).toFixed(2)}</td>
+        <td>${(team.overallAvg11 || 0).toFixed(2)}</td>
+        <td>${(team.overallAvg16 || 0).toFixed(2)}</td>
+        <td>${(team.overallAvgAll || 0).toFixed(2)}</td>
+        <td>${team.points}</td>
+      `;
+      tbody.appendChild(tr);
+
+      // Expanded row
+      const trExp = document.createElement('tr');
+      trExp.className = 'expanded-row';
+      const tdExp = document.createElement('td');
+      tdExp.colSpan = 26;
+
+      const content = document.createElement('div');
+      content.className = 'expanded-content';
+
+      const playerTableDiv = document.createElement('div');
+      content.appendChild(playerTableDiv);
+
+      const matchTableDiv = document.createElement('div');
+      matchTableDiv.className = 'match-table-wrapper';
+      matchTableDiv.innerHTML = '<div style="margin-bottom: 8px; font-weight: bold;">Match History</div>';
+
+      const matchTable = createMatchTable(team);
+      matchTableDiv.appendChild(matchTable);
+      content.appendChild(matchTableDiv);
+
+      tdExp.appendChild(content);
+      trExp.appendChild(tdExp);
+      tbody.appendChild(trExp);
+
+      tr.onclick = async () => {
+        const isOpen = trExp.classList.toggle('open');
+        if (isOpen) {
+          if (!playerTableDiv.hasChildNodes()) {
+            renderPlayerTable(playerTableDiv, team);
+          }
+
+          if (!team._formationsLoaded && globalMetadataMap) {
+            team._formationsLoaded = true;
+            const prevStatus = document.getElementById('mfl-status')?.textContent;
+            setStatus(`Loading formations for ${team.teamName}...`);
+
+            try {
+              await loadFormationsForTeam(team, globalMetadataMap);
+              matchTableDiv.innerHTML = '<div style="margin-bottom: 8px; font-weight: bold;">Match History</div>';
+              matchTableDiv.appendChild(createMatchTable(team));
+            } catch (e) {
+              console.error(`Failed to load formations:`, e);
+            }
+
+            if (prevStatus) setStatus(prevStatus);
+          }
+        }
+      };
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+
+    // Add click handlers for sorting
+    thead.querySelectorAll('th[data-col]').forEach((th) => {
+      th.onclick = (e) => {
+        e.stopPropagation();
+        const col = th.getAttribute('data-col');
+        if (currentTableSort.column === col) {
+          currentTableSort.asc = !currentTableSort.asc;
+        } else {
+          currentTableSort.column = col;
+          currentTableSort.asc = false;
+        }
+        renderLeagueTable(teamsMap);
+      };
+    });
+  }
+
+  // ============================================================================
+  // UI: MATCH TABLE
+  // ============================================================================
+  function createMatchTable(team) {
+    const table = document.createElement('table');
+    table.className = 'player-table';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th>Date</th>
+        <th>Opp</th>
+        <th>H/A</th>
+        <th>Score</th>
+        <th>xG</th>
+        <th>xGA</th>
+        <th>Sh</th>
+        <th>ShA</th>
+        <th>SoT</th>
+        <th>SoTA</th>
+        <th>Poss</th>
+        <th>XI Overall</th>
+        <th>Formation</th>
+        <th>Opp XI</th>
+        <th>Opp Form</th>
+        <th>Top Chance Creator</th>
+        <th>Opp Top Chance Creator</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    const sorted = [...team.matchDetails].sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return da - db;
+    });
+
+    sorted.forEach((m) => {
+      const tr = document.createElement('tr');
+      const dateStr = m.date ? new Date(m.date).toLocaleString() : '—';
+      // Look up opponent name from globalTeamsMap
+      let oppName = m.opponentClubId || '—';
+      if (m.opponentClubId && globalTeamsMap) {
+        const oppTeam = globalTeamsMap.get(m.opponentClubId);
+        if (oppTeam && oppTeam.teamName) {
+          oppName = oppTeam.teamName;
+        }
+      }
+
+      const topCC = m.topChanceCreator || { name: '—', chances: 0 };
+      const oppTopCC = m.oppTopChanceCreator || { name: '—', chances: 0 };
+
+      tr.innerHTML = `
+        <td>${dateStr}</td>
+        <td>${oppName}</td>
+        <td>${m.homeAway === 'H' ? 'Home' : 'Away'}</td>
+        <td>${m.scoreFor} - ${m.scoreAgainst}</td>
+        <td>${m.xGFor.toFixed(2)}</td>
+        <td>${m.xGAgainst.toFixed(2)}</td>
+        <td>${m.shotsFor}</td>
+        <td>${m.shotsAgainst}</td>
+        <td>${m.sotFor}</td>
+        <td>${m.sotAgainst}</td>
+        <td>${m.possFor.toFixed(0)}%</td>
+        <td>${m.xiOverall.toFixed(2)}</td>
+        <td>${m.formation || '—'}</td>
+        <td>${m.oppXiOverall.toFixed(2)}</td>
+        <td>${m.oppFormation || '—'}</td>
+        <td>${topCC.name} (${topCC.chances})</td>
+        <td>${oppTopCC.name} (${oppTopCC.chances})</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    return table;
+  }
+
+  // ============================================================================
+  // UI: PLAYER TABLE
+  // ============================================================================
+  function renderPlayerTable(container, team) {
+    const table = document.createElement('table');
+    table.className = 'player-table';
+
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    let sortCol = 'rating';
+    let sortAsc = false;
+
+    const draw = () => {
+      const players = [...team.players.values()].sort((a, b) => {
+        if (sortCol === 'name') {
+          return sortAsc
+            ? a.name.localeCompare(b.name)
+            : b.name.localeCompare(a.name);
+        }
+        if (sortCol === 'appearances') {
+          return sortAsc ? a.appearances - b.appearances : b.appearances - a.appearances;
+        }
+
+        const col = PLAYER_COLS.find((c) => c.id === sortCol);
+        if (!col) return 0;
+
+        const getVal = (p, colDef) => {
+          if (colDef.isPct) {
+            const num = p.sums[colDef.num] || 0;
+            const den =
+              typeof colDef.den === 'function'
+                ? colDef.den(p.sums)
+                : p.sums[colDef.den] || 0;
+            return den > 0 ? num / den : 0;
+          }
+          return (p.sums[colDef.id] || 0) / p.appearances;
+        };
+
+        return sortAsc
+          ? getVal(a, col) - getVal(b, col)
+          : getVal(b, col) - getVal(a, col);
+      });
+
+      let thHTML = '<tr><th data-sort="name">Player</th><th data-sort="appearances">Apps</th>';
+      PLAYER_COLS.forEach((c) => {
+        thHTML += `<th data-sort="${c.id}" title="${c.name}">${c.lbl}</th>`;
+      });
+      thHTML += '</tr>';
+      thead.innerHTML = thHTML;
+
+      tbody.innerHTML = '';
+      players.forEach((p) => {
+        let row = `<td><b>${p.name}</b>${
+          p.positions.size ? ` (${[...p.positions].join(',')})` : ''
+        }</td><td>${p.appearances}</td>`;
+        PLAYER_COLS.forEach((c) => {
+          let val = 0;
+          if (c.isPct) {
+            const num = p.sums[c.num] || 0;
+            const den =
+              typeof c.den === 'function'
+                ? c.den(p.sums)
+                : p.sums[c.den] || 0;
+            val = den > 0 ? num / den : 0;
+            row += `<td>${(val * 100).toFixed(0)}%</td>`;
+          } else {
+            val = (p.sums[c.id] || 0) / p.appearances;
+            row += `<td>${c.fmt(val)}</td>`;
+          }
+        });
+        tbody.innerHTML += `<tr>${row}</tr>`;
+      });
+
+      thead.querySelectorAll('th[data-sort]').forEach((th) => {
+        th.onclick = () => {
+          const col = th.dataset.sort;
+          if (sortCol === col) {
+            sortAsc = !sortAsc;
+          } else {
+            sortCol = col;
+            sortAsc = false;
+          }
+          draw();
+        };
+      });
+    };
+
+    draw();
+    container.appendChild(table);
+  }
+
+  // ============================================================================
+  // CSV EXPORT
+  // ============================================================================
+  function downloadCSV() {
+    if (!globalTeamsMap || globalTeamsMap.size === 0) {
+      alert('No data available for export.');
+      return;
+    }
+
+    const rows = [];
+    rows.push([
+      'teamName',
+      'clubId',
+      'matchId',
+      'date',
+      'homeAway',
+      'opponentClubId',
+      'scoreFor',
+      'scoreAgainst',
+      'xGFor',
+      'xGAgainst',
+      'shotsFor',
+      'shotsAgainst',
+      'sotFor',
+      'sotAgainst',
+      'possFor',
+      'possAgainst',
+      'formationThis',
+      'xiOverallThis',
+      'formationOpp',
+      'xiOverallOpp',
+      'pointsFromMatch',
+    ].join(','));
+
+    for (const team of globalTeamsMap.values()) {
+      const sorted = [...team.matchDetails].sort((a, b) => {
+        const da = a.date ? new Date(a.date).getTime() : 0;
+        const db = b.date ? new Date(b.date).getTime() : 0;
+        return da - db;
+      });
+
+      sorted.forEach((m) => {
+        let pts = 0;
+        if (m.scoreFor > m.scoreAgainst) pts = 3;
+        else if (m.scoreFor === m.scoreAgainst) pts = 1;
+
+        rows.push([
+          team.teamName,
+          team.clubId,
+          m.matchId,
+          m.date || '',
+          m.homeAway,
+          m.opponentClubId || '',
+          m.scoreFor,
+          m.scoreAgainst,
+          m.xGFor.toFixed(2),
+          m.xGAgainst.toFixed(2),
+          m.shotsFor,
+          m.shotsAgainst,
+          m.sotFor,
+          m.sotAgainst,
+          m.possFor.toFixed(2),
+          m.possAgainst.toFixed(2),
+          m.formation || '',
+          m.xiOverall.toFixed(2),
+          m.oppFormation || '',
+          m.oppXiOverall.toFixed(2),
+          pts,
+        ].join(','));
+      });
+    }
+
+    const csv = rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mfl_league_table_${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  
+  // ============================================================================
+  // FAVORITES MANAGEMENT
+  // ============================================================================
+  function getFavorites() {
+    try {
+      const json = localStorage.getItem('mfl_favorites');
+      return json ? JSON.parse(json) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveFavorites(favorites) {
+    try {
+      localStorage.setItem('mfl_favorites', JSON.stringify(favorites));
+      return true;
+    } catch (e) {
+      console.error('[Favorites] Failed to save:', e);
+      return false;
+    }
+  }
+
+  function addToFavorites(competition) {
+    const favorites = getFavorites();
+    const exists = favorites.find(f => f.id === competition.id);
+
+    if (!exists) {
+      favorites.push({
+        id: competition.id,
+        name: competition.name,
+        type: competition.type,
+        code: competition.code
+      });
+      saveFavorites(favorites);
+    }
+
+    renderFavorites();
+    updateFavoriteButton();
+  }
+
+  function removeFromFavorites(compId) {
+    let favorites = getFavorites();
+    favorites = favorites.filter(f => f.id !== compId);
+    saveFavorites(favorites);
+    renderFavorites();
+    updateFavoriteButton();
+  }
+
+  function isFavorite(compId) {
+    const favorites = getFavorites();
+    return favorites.some(f => f.id === compId);
+  }
+
+  function renderFavorites() {
+    const container = document.getElementById('favorites-list');
+    const favorites = getFavorites();
+
+    if (favorites.length === 0) {
+      container.innerHTML = '<span class="empty-favorites">No favorites yet. Load a competition and add it to favorites!</span>';
+      return;
+    }
+
+    container.innerHTML = '';
+    favorites.forEach(fav => {
+      const div = document.createElement('div');
+      div.className = 'favorite-item';
+      div.innerHTML = `
+        <span>${fav.name}</span>
+        <span class="favorite-remove" data-id="${fav.id}">×</span>
+      `;
+
+      div.onclick = (e) => {
+        if (!e.target.classList.contains('favorite-remove')) {
+          loadCompetitionById(fav.id);
+        }
+      };
+
+      const removeBtn = div.querySelector('.favorite-remove');
+      removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeFromFavorites(fav.id);
+      };
+
+      container.appendChild(div);
+    });
+  }
+
+  function updateFavoriteButton() {
+    const btn = document.getElementById('favorite-btn');
+    if (!selectedCompetitionId || !currentCompetitionData) {
+      btn.style.display = 'none';
+      return;
+    }
+
+    btn.style.display = 'block';
+
+    if (isFavorite(selectedCompetitionId)) {
+      btn.textContent = '★ Remove from Favorites';
+      btn.onclick = () => {
+        removeFromFavorites(selectedCompetitionId);
+      };
+    } else {
+      btn.textContent = '⭐ Add to Favorites';
+      btn.onclick = () => {
+        addToFavorites(currentCompetitionData);
+      };
+    }
+  }
+
+  // ============================================================================
+  // COMPETITION SEARCH
+  // ============================================================================
+  async function fetchAllCompetitions() {
+    try {
+      setStatus('Loading competitions list...', 'loading');
+      const response = await httpGet(`${API_BASE}/competitions?upcoming=true`);
+      allCompetitions = JSON.parse(response);
+      console.log(`[Competitions] Loaded ${allCompetitions.length} competitions`);
+      setStatus('Search for a competition to get started', 'success');
+    } catch (e) {
+      console.error('[Competitions] Failed to fetch:', e);
+      setStatus('Failed to load competitions list', 'error');
+      allCompetitions = [];
+    }
+  }
+
+  function filterCompetitions(query) {
+    if (!query) return [];
+
+    const lowerQuery = query.toLowerCase();
+
+    return allCompetitions.filter(comp => {
+      const nameMatch = comp.name && comp.name.toLowerCase().includes(lowerQuery);
+      const idMatch = comp.id && String(comp.id).includes(query);
+      const codeMatch = comp.code && comp.code.toLowerCase().includes(lowerQuery);
+
+      return nameMatch || idMatch || codeMatch;
+    }).slice(0, 20); // Limit to 20 results
+  }
+
+  function renderSuggestions(competitions) {
+    const container = document.getElementById('suggestions');
+
+    if (competitions.length === 0) {
+      container.classList.remove('active');
+      return;
+    }
+
+    container.innerHTML = '';
+    competitions.forEach(comp => {
+      const div = document.createElement('div');
+      div.className = 'suggestion-item';
+
+      const statusBadge = comp.status === 'LIVE' ? '🟢 LIVE' : 
+                          comp.status === 'UPCOMING' ? '🟡 UPCOMING' : 
+                          '⚪ ' + comp.status;
+
+      div.innerHTML = `
+        <div class="suggestion-name">${comp.name}</div>
+        <div class="suggestion-meta">
+          ${statusBadge} | ${comp.type} | ID: ${comp.id} | ${comp.nbParticipants || 0} teams
+        </div>
+      `;
+
+      div.onclick = () => {
+        document.getElementById('search-input').value = comp.name;
+        selectedCompetitionId = comp.id;
+        currentCompetitionData = comp;
+        container.classList.remove('active');
+        document.getElementById('load-btn').disabled = false;
+        updateFavoriteButton();
+      };
+
+      container.appendChild(div);
+    });
+
+    container.classList.add('active');
+  }
+
+  // ============================================================================
+  // AUTO-LOAD ALL DATA (PARALLEL)
+  // ============================================================================
+  async function autoLoadAllData(teamsMap) {
+    setStatus('Loading all data (names, ratings, player names)...', 'loading');
+
+    try {
+      // Load all enrichments in parallel
+      await Promise.all([
+        enrichTeamNames(teamsMap),
+        enrichPlayerOveralls(teamsMap),
+        enrichPlayerNames(teamsMap)
+      ]);
+
+      setStatus('Complete! All data loaded successfully.', 'success');
+    } catch (e) {
+      console.error('[Auto-load] Error:', e);
+      setStatus('Completed with some errors. Check console.', 'error');
+    }
+  }
+
+  // ============================================================================
+  // MAIN: LOAD COMPETITION
+  // ============================================================================
+  async function loadCompetitionById(competitionId) {
+    // Show loading state
+    document.getElementById('table-wrapper').style.display = 'none';
+    setStatus(`Loading competition ${competitionId}...`, 'loading');
+
+    selectedCompetitionId = competitionId;
+
+    try {
+      // Step 1: Fetch competition JSON
+      const compText = await httpGet(`${API_BASE}/competitions/${competitionId}`);
+      const compJson = JSON.parse(compText);
+
+      currentCompetitionData = compJson;
+      updateFavoriteButton();
+
+      // Update competition header
+      document.getElementById('comp-title').textContent = compJson.name || `Competition ${competitionId}`;
+      document.getElementById('comp-meta').innerHTML = `
+        <span><strong>Status:</strong> ${compJson.status || 'N/A'}</span>
+        <span><strong>Type:</strong> ${compJson.type || 'N/A'}</span>
+        <span><strong>Code:</strong> ${compJson.code || 'N/A'}</span>
+        <span><strong>Teams:</strong> ${compJson.nbParticipants || 'N/A'}</span>
+        <span><strong>ID:</strong> ${competitionId}</span>
+      `;
+
+      // Step 2: Extract match metadata
+      const metadataMap = extractMatchMetadataFromCompetition(compJson);
+      console.log(`[League Table] Extracted metadata for ${metadataMap.size} matches`);
+
+      // Step 3: Filter playable matches
+      const playableMatchIds = getPlayableMatchIds(metadataMap);
+
+      if (playableMatchIds.length === 0) {
+        setStatus('No playable matches found (ENDED or FORFEITED).', 'error');
+        globalTeamsMap = new Map();
+        document.getElementById('table-wrapper').style.display = 'block';
+        return;
+      }
+
+      // Step 4: Aggregate all matches
+      const teamsMap = await aggregateAllMatches(metadataMap, playableMatchIds);
+      globalTeamsMap = teamsMap;
+      globalMetadataMap = metadataMap;
+
+      // Step 5: Render initial table (with IDs)
+      currentTableSort = { column: 'points', asc: false };
+      renderLeagueTable(teamsMap);
+      document.getElementById('table-wrapper').style.display = 'block';
+
+      setStatus(`Loaded ${teamsMap.size} teams, ${playableMatchIds.length} matches. Loading names...`, 'loading');
+
+      // Step 6: Auto-load all enrichments in parallel
+      await autoLoadAllData(teamsMap);
+
+    } catch (e) {
+      console.error('[League Table] Error:', e);
+      setStatus(`Error: ${e.message}`, 'error');
+      globalTeamsMap = new Map();
+    }
+  }
+
+  // ============================================================================
+  // EVENT HANDLERS
+  // ============================================================================
+  function initializeEventHandlers() {
+    const searchInput = document.getElementById('search-input');
+    const loadBtn = document.getElementById('load-btn');
+    const clearCacheBtn = document.getElementById('clear-cache-btn');
+    const downloadBtn = document.getElementById('download-csv-btn');
+
+    // Search input
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+
+      if (query.length < 2) {
+        document.getElementById('suggestions').classList.remove('active');
+        loadBtn.disabled = true;
+        return;
+      }
+
+      const results = filterCompetitions(query);
+      renderSuggestions(results);
+
+      // Check if exact ID match
+      const exactMatch = allCompetitions.find(c => String(c.id) === query);
+      if (exactMatch) {
+        selectedCompetitionId = exactMatch.id;
+        currentCompetitionData = exactMatch;
+        loadBtn.disabled = false;
+        updateFavoriteButton();
+      } else {
+        loadBtn.disabled = true;
+      }
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-container')) {
+        document.getElementById('suggestions').classList.remove('active');
+      }
+    });
+
+    // Load button
+    loadBtn.addEventListener('click', () => {
+      if (selectedCompetitionId) {
+        loadCompetitionById(selectedCompetitionId);
+        document.getElementById('suggestions').classList.remove('active');
+      }
+    });
+
+    // Enter key to load
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !loadBtn.disabled) {
+        loadCompetitionById(selectedCompetitionId);
+        document.getElementById('suggestions').classList.remove('active');
+      }
+    });
+
+    // Clear cache button
+    clearCacheBtn.addEventListener('click', () => {
+      if (confirm('Clear all cached data? This will remove match data, formations, club names, and player names.')) {
+        const success = clearAllCache();
+        if (success) {
+          setStatus('Cache cleared successfully!', 'success');
+          setTimeout(() => setStatus('Search for a competition to get started', ''), 2000);
+        } else {
+          setStatus('Failed to clear cache', 'error');
+        }
+      }
+    });
+
+    // Download CSV button
+    downloadBtn.addEventListener('click', () => {
+      downloadCSV();
+    });
+  }
+
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
+  async function initialize() {
+    console.log('[MFL League Table] Initializing...');
+
+    // Render favorites
+    renderFavorites();
+
+    // Initialize event handlers
+    initializeEventHandlers();
+
+    // Fetch competitions list
+    await fetchAllCompetitions();
+
+    console.log('[MFL League Table] Ready!');
+  }
+
+  // Start the application
+  initialize();
+})();
+
+  </script>
+</body>
+</html>
