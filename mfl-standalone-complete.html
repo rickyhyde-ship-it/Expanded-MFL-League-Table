@@ -1670,8 +1670,8 @@
         if (!player || !player.id) return;
 
         const pid = String(player.id);
-        const firstName = player.firstName || '';
-        const lastName = player.lastName || '';
+        const firstName = player.firstName || player.metadata?.firstName || '';
+        const lastName = player.lastName || player.metadata?.lastName || '';
         const fullName = `${firstName} ${lastName}`.trim();
 
         if (fullName && !fullName.startsWith('Player ')) {
@@ -2520,7 +2520,7 @@
       globalTeamsMap = teamsMap;
       globalMetadataMap = metadataMap;
 
-      // IMPORTANT: Render table immediately with IDs
+      // Render table immediately with IDs
       currentTableSort = { column: 'points', asc: false };
       renderLeagueTable(teamsMap);
       document.getElementById('table-wrapper').style.display = 'block';
@@ -2534,7 +2534,7 @@
         enrichPlayerNames(teamsMap)
       ]);
 
-      // IMPORTANT: Re-render table with enriched data
+      // Re-render table with enriched data
       renderLeagueTable(teamsMap);
       setStatus('Complete! All data loaded successfully.', 'success');
 
