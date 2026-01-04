@@ -1861,7 +1861,7 @@
   // UI: RENDER LEAGUE TABLE
   // ============================================================================
   function renderLeagueTable(teamsMap) {
-    const container = document.getElementById('mfl-table-container');
+    const container = document.getElementById('table-container');
     if (!container) return;
     container.innerHTML = '';
 
@@ -2284,7 +2284,7 @@
   }
 
   // ============================================================================
-  // STANDALONE SPECIFIC: VARIABLES AND STATUS
+  // STANDALONE: VARIABLES
   // ============================================================================
   let allCompetitions = [];
   let selectedCompetitionId = null;
@@ -2300,7 +2300,7 @@
   }
 
   // ============================================================================
-  // STANDALONE SPECIFIC: FAVORITES
+  // STANDALONE: FAVORITES
   // ============================================================================
   function getFavorites() {
     try {
@@ -2409,7 +2409,7 @@
   }
 
   // ============================================================================
-  // STANDALONE SPECIFIC: COMPETITION SEARCH
+  // STANDALONE: COMPETITION SEARCH
   // ============================================================================
   async function fetchAllCompetitions() {
     try {
@@ -2479,7 +2479,7 @@
   }
 
   // ============================================================================
-  // STANDALONE SPECIFIC: MAIN LOAD FUNCTION
+  // STANDALONE: MAIN LOAD FUNCTION
   // ============================================================================
   async function loadCompetitionById(competitionId) {
     document.getElementById('table-wrapper').style.display = 'none';
@@ -2520,18 +2520,21 @@
       globalTeamsMap = teamsMap;
       globalMetadataMap = metadataMap;
 
+      // IMPORTANT: Render table immediately with IDs
       currentTableSort = { column: 'points', asc: false };
       renderLeagueTable(teamsMap);
       document.getElementById('table-wrapper').style.display = 'block';
 
       setStatus(`Loading enrichments (names, ratings, player names)...`, 'loading');
 
+      // Load enrichments in parallel
       await Promise.all([
         enrichTeamNames(teamsMap),
         enrichPlayerOveralls(teamsMap),
         enrichPlayerNames(teamsMap)
       ]);
 
+      // IMPORTANT: Re-render table with enriched data
       renderLeagueTable(teamsMap);
       setStatus('Complete! All data loaded successfully.', 'success');
 
@@ -2543,7 +2546,7 @@
   }
 
   // ============================================================================
-  // STANDALONE SPECIFIC: EVENT HANDLERS
+  // STANDALONE: EVENT HANDLERS
   // ============================================================================
   function initializeEventHandlers() {
     const searchInput = document.getElementById('search-input');
@@ -2595,7 +2598,7 @@
     });
 
     clearCacheBtn.addEventListener('click', () => {
-      if (confirm('Clear all cached data? This will remove match data, formations, club names, and player names.')) {
+      if (confirm('Clear all cached data?')) {
         const success = clearAllCache();
         if (success) {
           setStatus('Cache cleared successfully!', 'success');
@@ -2612,7 +2615,7 @@
   }
 
   // ============================================================================
-  // STANDALONE SPECIFIC: INITIALIZATION
+  // STANDALONE: INITIALIZATION
   // ============================================================================
   async function initialize() {
     console.log('[MFL League Table] Initializing...');
