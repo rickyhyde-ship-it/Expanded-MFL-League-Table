@@ -283,7 +283,7 @@
       flex-wrap: wrap;
     }
 
-    .table-container {
+    #table-container {
       overflow-x: auto;
     }
 
@@ -429,48 +429,16 @@
 
     .match-table-wrapper table {
       font-size: 11px;
+      border-collapse: collapse;
     }
 
     .match-table-wrapper th {
       color: #9ca3af;
+      padding: 4px 6px;
     }
 
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(251,191,36,0.3);
-      border-top-color: #fbbf24;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-right: 8px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #9ca3af;
-    }
-
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    .empty-state-text {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .empty-state-subtext {
-      font-size: 14px;
-      opacity: 0.7;
+    .match-table-wrapper td {
+      padding: 4px 6px;
     }
 
     @media (max-width: 768px) {
@@ -1702,9 +1670,8 @@
         if (!player || !player.id) return;
 
         const pid = String(player.id);
-        const meta = player.metadata || {};
-        const firstName = meta.firstName || '';
-        const lastName = meta.lastName || '';
+        const firstName = player.firstName || '';
+        const lastName = player.lastName || '';
         const fullName = `${firstName} ${lastName}`.trim();
 
         if (fullName && !fullName.startsWith('Player ')) {
@@ -1750,101 +1717,6 @@
     renderLeagueTable(teamsMap);
   }
 
-
-  // ============================================================================
-  // UI: CREATE OVERLAY
-  // ============================================================================
-  function createOverlay() {
-    let overlay = document.getElementById('mfl-league-overlay');
-    if (overlay) return overlay;
-
-    overlay = document.createElement('div');
-    overlay.id = 'mfl-league-overlay';
-    overlay.innerHTML = `
-      <div class="overlay-header">
-        <h2>League Table</h2>
-        <div class="overlay-header-right">
-          <button class="btn-download" id="mfl-fetch-names">Load Club Names</button>
-          <button class="btn-download" id="mfl-fetch-overalls">Load Player Ratings</button>
-          <button class="btn-download" id="mfl-fetch-player-names">Load Player Names</button>
-          <button class="btn-download" id="mfl-clear-cache">Clear Cache</button>
-          <button class="btn-download" id="mfl-download-csv">Download CSV</button>
-          <span class="btn-toggle">–</span>
-          <span class="btn-close">×</span>
-        </div>
-      </div>
-      <div class="overlay-body">
-        <div class="status-text" id="mfl-status">Loading...</div>
-        <div class="table-container" id="mfl-table-container"></div>
-      </div>
-    `;
-
-    const toggle = overlay.querySelector('.btn-toggle');
-    const handleToggle = (e) => {
-      e.stopPropagation();
-      overlay.classList.toggle('collapsed');
-      toggle.textContent = overlay.classList.contains('collapsed') ? '+' : '–';
-    };
-
-    toggle.onclick = handleToggle;
-
-    // Allow clicking collapsed overlay to expand
-    overlay.onclick = (e) => {
-      if (overlay.classList.contains('collapsed')) {
-        handleToggle(e);
-      }
-    };
-
-    overlay.querySelector('.btn-close').onclick = () => overlay.remove();
-
-    overlay.querySelector('#mfl-download-csv').onclick = (e) => {
-      e.stopPropagation();
-      downloadCSV();
-    };
-
-    overlay.querySelector('#mfl-fetch-names').onclick = async (e) => {
-      e.stopPropagation();
-      if (!globalTeamsMap) {
-        alert('Please wait for initial data to load first.');
-        return;
-      }
-      await enrichTeamNames(globalTeamsMap);
-    };
-
-    overlay.querySelector('#mfl-fetch-overalls').onclick = async (e) => {
-      e.stopPropagation();
-      if (!globalTeamsMap) {
-        alert('Please wait for initial data to load first.');
-        return;
-      }
-      await enrichPlayerOveralls(globalTeamsMap);
-    };
-
-    overlay.querySelector('#mfl-fetch-player-names').onclick = async (e) => {
-      e.stopPropagation();
-      if (!globalTeamsMap) {
-        alert('Please wait for initial data to load first.');
-        return;
-      }
-      await enrichPlayerNames(globalTeamsMap);
-    };
-
-    overlay.querySelector('#mfl-clear-cache').onclick = (e) => {
-      e.stopPropagation();
-      if (confirm('Clear all cached data? This will slow down the next load.')) {
-        const success = clearAllCache();
-        alert(success ? 'Cache cleared!' : 'Failed to clear cache.');
-      }
-    };
-
-    document.body.appendChild(overlay);
-    return overlay;
-  }
-
-  function setStatus(msg) {
-    const el = document.getElementById('mfl-status');
-    if (el) el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  }
 
   // ============================================================================
   // UI: SORT TEAMS
@@ -2411,16 +2283,24 @@
     URL.revokeObjectURL(url);
   }
 
-  
   // ============================================================================
-  // STANDALONE VARIABLES
+  // STANDALONE SPECIFIC: VARIABLES AND STATUS
   // ============================================================================
   let allCompetitions = [];
   let selectedCompetitionId = null;
   let currentCompetitionData = null;
 
+  function setStatus(msg, type = 'loading') {
+    const el = document.getElementById('status');
+    if (el) {
+      el.textContent = msg;
+      el.className = 'status-text ' + type;
+    }
+    console.log('[Status]', msg);
+  }
+
   // ============================================================================
-  // FAVORITES MANAGEMENT
+  // STANDALONE SPECIFIC: FAVORITES
   // ============================================================================
   function getFavorites() {
     try {
@@ -2529,7 +2409,7 @@
   }
 
   // ============================================================================
-  // COMPETITION SEARCH
+  // STANDALONE SPECIFIC: COMPETITION SEARCH
   // ============================================================================
   async function fetchAllCompetitions() {
     try {
@@ -2599,29 +2479,7 @@
   }
 
   // ============================================================================
-  // AUTO-LOAD ALL DATA (PARALLEL)
-  // ============================================================================
-  async function autoLoadAllData(teamsMap) {
-    setStatus('Loading all enrichments in parallel...', 'loading');
-
-    try {
-      await Promise.all([
-        enrichTeamNames(teamsMap),
-        enrichPlayerOveralls(teamsMap),
-        enrichPlayerNames(teamsMap)
-      ]);
-
-      setStatus('Complete! All data loaded successfully.', 'success');
-      renderLeagueTable(teamsMap);
-    } catch (e) {
-      console.error('[Auto-load] Error:', e);
-      setStatus('Completed with some errors. Check console.', 'error');
-      renderLeagueTable(teamsMap);
-    }
-  }
-
-  // ============================================================================
-  // MAIN: LOAD COMPETITION
+  // STANDALONE SPECIFIC: MAIN LOAD FUNCTION
   // ============================================================================
   async function loadCompetitionById(competitionId) {
     document.getElementById('table-wrapper').style.display = 'none';
@@ -2657,6 +2515,7 @@
         return;
       }
 
+      setStatus(`Aggregating ${playableMatchIds.length} matches...`, 'loading');
       const teamsMap = await aggregateAllMatches(metadataMap, playableMatchIds);
       globalTeamsMap = teamsMap;
       globalMetadataMap = metadataMap;
@@ -2665,9 +2524,16 @@
       renderLeagueTable(teamsMap);
       document.getElementById('table-wrapper').style.display = 'block';
 
-      setStatus(`Loaded ${teamsMap.size} teams. Loading names and ratings...`, 'loading');
+      setStatus(`Loading enrichments (names, ratings, player names)...`, 'loading');
 
-      await autoLoadAllData(teamsMap);
+      await Promise.all([
+        enrichTeamNames(teamsMap),
+        enrichPlayerOveralls(teamsMap),
+        enrichPlayerNames(teamsMap)
+      ]);
+
+      renderLeagueTable(teamsMap);
+      setStatus('Complete! All data loaded successfully.', 'success');
 
     } catch (e) {
       console.error('[League Table] Error:', e);
@@ -2677,7 +2543,7 @@
   }
 
   // ============================================================================
-  // EVENT HANDLERS
+  // STANDALONE SPECIFIC: EVENT HANDLERS
   // ============================================================================
   function initializeEventHandlers() {
     const searchInput = document.getElementById('search-input');
@@ -2746,7 +2612,7 @@
   }
 
   // ============================================================================
-  // INITIALIZATION
+  // STANDALONE SPECIFIC: INITIALIZATION
   // ============================================================================
   async function initialize() {
     console.log('[MFL League Table] Initializing...');
