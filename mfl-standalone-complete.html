@@ -5,87 +5,159 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MFL League Table Analytics</title>
   <style>
-    * {
+    /* ============================================================
+       CSS CUSTOM PROPERTIES
+    ============================================================ */
+    :root {
+      --accent: #EEFF00;
+      --accent-dim: rgba(238,255,0,0.12);
+      --accent-glow: rgba(238,255,0,0.28);
+      --accent-bright: #FFF76B;
+      --bg-0: #040810;
+      --bg-1: #07101e;
+      --bg-2: #0d1628;
+      --bg-card: rgba(255,255,255,0.034);
+      --bg-card-hover: rgba(255,255,255,0.055);
+      --bg-input: rgba(4,8,16,0.85);
+      --border: rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.13);
+      --border-accent: rgba(238,255,0,0.25);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --text-dim: #475569;
+      --green: #22c55e;
+      --green-dim: rgba(34,197,94,0.14);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245,158,11,0.14);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.14);
+      --gold: #fbbf24;
+      --gold-dim: rgba(251,191,36,0.18);
+      --radius-xs: 5px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 32px rgba(0,0,0,0.45);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.6);
+      --shadow-accent: 0 4px 20px rgba(238,255,0,0.22);
+    }
+
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
+    /* ============================================================
+       BODY & BACKGROUND
+    ============================================================ */
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #334155 0%, #475569 50%, #334155 100%);
+      background-color: var(--bg-0);
+      background-image:
+        radial-gradient(ellipse 90% 55% at 15% -5%, rgba(238,255,0,0.055) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 85% 105%, rgba(59,130,246,0.07) 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 40%, var(--bg-2) 70%, var(--bg-1) 100%);
       background-attachment: fixed;
-      color: #f1f5f9;
+      color: var(--text-primary);
       min-height: 100vh;
-      padding: 20px;
+      padding: 24px 20px 40px;
       overflow-x: hidden;
+      line-height: 1.5;
     }
 
-    /* Optimized texture overlay - simplified for better performance */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.02) 1px, transparent 1px),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 50px 50px, 80px 80px;
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0.6;
+    /* ============================================================
+       ANIMATIONS
+    ============================================================ */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .header, .controls, .status-container, .table-wrapper, .footer {
       position: relative;
       z-index: 2;
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
     }
 
+    /* ============================================================
+       HEADER
+    ============================================================ */
     .header {
       max-width: 1800px;
-      margin: 0 auto 30px;
+      margin: 0 auto 24px;
       text-align: center;
-      padding: 30px 20px;
-      background: rgba(30, 41, 59, 0.85);
-      border-radius: 16px;
-      border: 1px solid rgba(238, 255, 0, 0.1);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      padding: 36px 32px;
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-accent);
+      box-shadow: var(--shadow-md), inset 0 1px 0 rgba(238,255,0,0.04);
+      animation: fadeInUp 0.45s ease both;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 18px;
     }
 
     .header h1 {
-      font-size: 42px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #EEFF00 0%, #FFF76B 100%);
+      font-size: clamp(28px, 4.5vw, 46px);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 50%, #ffffff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 12px;
-      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+      line-height: 1.1;
     }
 
     .header p {
-      color: #cbd5e1;
-      font-size: 16px;
+      color: var(--text-muted);
+      font-size: 15px;
       font-weight: 400;
+      max-width: 500px;
+      margin: 0 auto;
     }
 
+    /* ============================================================
+       CONTROLS PANEL
+    ============================================================ */
     .controls {
       max-width: 1800px;
       margin: 0 auto 20px;
-      background: rgba(30, 41, 59, 0.85);
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       padding: 24px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      animation: fadeInUp 0.45s ease 0.06s both;
     }
 
     .search-container {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 20px;
       flex-wrap: wrap;
       position: relative;
@@ -94,33 +166,37 @@
     .search-input {
       flex: 1;
       min-width: 250px;
-      padding: 14px 18px;
+      padding: 13px 18px;
       font-size: 15px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 2px solid rgba(148, 163, 184, 0.3);
-      border-radius: 10px;
-      color: #f1f5f9;
-      transition: all 0.3s ease;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-bright);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
       font-family: inherit;
     }
 
     .search-input:focus {
       outline: none;
-      border-color: #EEFF00;
-      background: rgba(15, 23, 42, 0.95);
-      box-shadow: 0 0 0 3px rgba(238, 255, 0, 0.15);
+      border-color: var(--accent);
+      background: rgba(4,8,16,0.95);
+      box-shadow: 0 0 0 3px var(--accent-dim), var(--shadow-sm);
     }
 
-    .search-input::placeholder {
-      color: #94a3b8;
-    }
+    .search-input::placeholder { color: var(--text-dim); }
 
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
     .btn {
-      padding: 14px 26px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 13px 22px;
       font-size: 14px;
       font-weight: 600;
       border: none;
-      border-radius: 10px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: all 0.2s ease;
       white-space: nowrap;
@@ -128,228 +204,246 @@
       letter-spacing: 0.3px;
     }
 
+    .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
     .btn-primary {
-      background: linear-gradient(135deg, #EEFF00 0%, #FFF76B 100%);
-      color: #1e293b;
-      box-shadow: 0 4px 14px rgba(238, 255, 0, 0.3);
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
+      color: #07101e;
+      box-shadow: var(--shadow-accent);
     }
 
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(238, 255, 0, 0.4);
+      box-shadow: 0 8px 28px rgba(238,255,0,0.42);
     }
 
-    .btn-primary:active:not(:disabled) {
-      transform: translateY(0);
-    }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
 
     .btn-secondary {
-      background: rgba(71, 85, 105, 0.8);
-      color: #f1f5f9;
-      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(255,255,255,0.055);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-bright);
     }
 
     .btn-secondary:hover {
-      background: rgba(100, 116, 139, 0.9);
-      border-color: #EEFF00;
+      background: rgba(255,255,255,0.1);
+      border-color: var(--accent);
+      color: var(--text-primary);
     }
 
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
+    /* ============================================================
+       SUGGESTIONS DROPDOWN
+    ============================================================ */
     .suggestions {
-      background: rgba(15, 23, 42, 0.98);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      border-radius: 12px;
-      max-height: 350px;
+      background: rgba(6,12,24,0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-md);
+      max-height: 380px;
       overflow-y: auto;
       display: none;
       position: absolute;
-      z-index: 1000;
-      top: 100%;
+      z-index: 100;
+      top: calc(100% + 6px);
       left: 0;
       right: 0;
-      margin-top: 8px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: var(--shadow-lg);
     }
 
-    .suggestions.active {
-      display: block;
-    }
+    .suggestions.active { display: block; animation: fadeInUp 0.15s ease; }
 
     .suggestion-item {
-      padding: 14px 18px;
+      padding: 13px 18px;
       cursor: pointer;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      transition: all 0.2s ease;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.15s ease;
     }
 
     .suggestion-item:hover {
-      background: rgba(71, 85, 105, 0.5);
-      border-left: 3px solid #EEFF00;
+      background: rgba(238,255,0,0.05);
+      border-left: 3px solid var(--accent);
       padding-left: 15px;
     }
 
-    .suggestion-item:last-child {
-      border-bottom: none;
-    }
+    .suggestion-item:last-child { border-bottom: none; }
 
     .suggestion-name {
       font-weight: 600;
-      color: #EEFF00;
-      margin-bottom: 5px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
       font-size: 14px;
     }
 
     .suggestion-meta {
       font-size: 12px;
-      color: #94a3b8;
+      color: var(--text-muted);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
+    /* ============================================================
+       FAVORITES
+    ============================================================ */
     .favorites-container {
       margin-top: 20px;
       padding-top: 20px;
-      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      border-top: 1px solid var(--border);
     }
 
     .favorites-title {
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
-      color: #cbd5e1;
+      color: var(--text-muted);
       margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
     }
 
-    .favorites-list {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .favorites-list { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .favorite-item {
-      background: rgba(15, 23, 42, 0.8);
-      padding: 10px 14px;
-      border-radius: 8px;
+      background: var(--bg-input);
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
       font-size: 13px;
       display: flex;
       align-items: center;
       gap: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
+      border: 1px solid var(--border-bright);
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .favorite-item:hover {
-      background: rgba(71, 85, 105, 0.8);
-      border-color: #EEFF00;
-      transform: translateY(-2px);
+      background: rgba(238,255,0,0.06);
+      border-color: var(--accent);
+      transform: translateY(-1px);
     }
 
     .favorite-remove {
-      color: #ef4444;
+      color: var(--text-dim);
       font-weight: bold;
       cursor: pointer;
-      padding: 0 6px;
-      font-size: 18px;
+      padding: 0 4px;
+      font-size: 16px;
+      line-height: 1;
+      transition: color 0.2s;
     }
 
-    .favorite-remove:hover {
-      color: #dc2626;
-    }
+    .favorite-remove:hover { color: var(--red); }
 
-    .empty-favorites {
-      color: #64748b;
-      font-size: 13px;
-      font-style: italic;
-    }
+    .empty-favorites { color: var(--text-muted); font-size: 13px; font-style: italic; }
 
+    /* ============================================================
+       STATUS BAR
+    ============================================================ */
     .status-container {
       max-width: 1800px;
       margin: 0 auto 20px;
-      background: rgba(30, 41, 59, 0.85);
+      background: var(--bg-card);
       padding: 14px 24px;
-      border-radius: 12px;
-      text-align: center;
+      border-radius: var(--radius-md);
       min-height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
     }
 
-    .status-text {
-      font-size: 14px;
-      color: #cbd5e1;
-      font-weight: 500;
+    .status-inner { display: flex; align-items: center; gap: 10px; }
+
+    .spinner {
+      width: 17px;
+      height: 17px;
+      border: 2px solid var(--accent-dim);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0;
     }
 
-    .status-text.loading {
-      color: #EEFF00;
-      font-weight: 600;
-    }
+    .status-text { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+    .status-text.loading { color: var(--accent); font-weight: 600; }
 
-    .status-text.success {
-      color: #4ade80;
-      font-weight: 600;
-    }
+    .status-text.success { color: var(--green); font-weight: 600; }
+    .status-text.error   { color: var(--red);   font-weight: 600; }
 
-    .status-text.error {
-      color: #ef4444;
-      font-weight: 600;
-    }
-
+    /* ============================================================
+       TABLE WRAPPER
+    ============================================================ */
     .table-wrapper {
       max-width: 1800px;
       margin: 0 auto 30px;
-      background: rgba(30, 41, 59, 0.85);
-      padding: 24px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 28px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
       overflow-x: auto;
+      animation: fadeInUp 0.4s ease 0.1s both;
     }
 
     .competition-header {
       margin-bottom: 24px;
       padding-bottom: 20px;
-      border-bottom: 2px solid rgba(238, 255, 0, 0.2);
+      border-bottom: 1px solid var(--border-bright);
       display: flex;
       justify-content: space-between;
-      align-items: start;
+      align-items: flex-start;
       flex-wrap: wrap;
       gap: 16px;
     }
 
-    .competition-info {
-      flex: 1;
-    }
+    .competition-info { flex: 1; }
 
     .competition-title {
-      font-size: 26px;
-      font-weight: 700;
-      color: #EEFF00;
-      margin-bottom: 8px;
-      letter-spacing: -0.3px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      letter-spacing: -0.4px;
     }
 
     .competition-meta {
-      font-size: 13px;
-      color: #94a3b8;
+      font-size: 12px;
+      color: var(--text-muted);
       display: flex;
-      gap: 20px;
+      gap: 14px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
-    .competition-meta strong {
-      color: #cbd5e1;
-    }
+    .competition-meta strong { color: var(--text-secondary); }
 
+    .comp-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 99px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+    }
+    .comp-badge.live     { background: var(--green-dim); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .comp-badge.ended    { background: rgba(100,116,139,0.1); color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+    .comp-badge.upcoming { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+
+    /* Zone legend */
+    .zone-legend {
+      display: flex; gap: 18px; flex-wrap: wrap;
+      margin-bottom: 16px; align-items: center;
+    }
+    .zone-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+    .zone-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    /* ============================================================
+       TABLE CONTAINER
+    ============================================================ */
     #table-container {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -358,100 +452,130 @@
     .league-table {
       width: 100%;
       border-collapse: separate;
-      border-spacing: 0 6px;
+      border-spacing: 0 3px;
       font-size: 12px;
       white-space: nowrap;
     }
 
-    .league-table th {
+    .league-table thead th {
       text-align: center;
-      padding: 12px 10px;
-      color: #94a3b8;
+      padding: 10px 10px;
+      color: var(--text-muted);
       font-weight: 700;
       text-transform: uppercase;
       font-size: 10px;
-      letter-spacing: 0.5px;
-      border-bottom: 2px solid rgba(148, 163, 184, 0.2);
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid var(--border-bright);
       cursor: pointer;
       user-select: none;
       transition: color 0.2s ease;
-      background: rgba(30, 41, 59, 0.95);
+      background: transparent;
     }
 
-    .league-table th:hover {
-      color: #EEFF00;
-    }
+    .league-table thead th:hover { color: var(--accent); }
+    .league-table thead th[data-sorted="true"] { color: var(--accent); }
 
-    .league-table th:first-child {
+    .league-table thead th:first-child {
       text-align: left;
       padding-left: 14px;
       position: sticky;
       left: 0;
       z-index: 10;
+      background: var(--bg-1);
     }
 
-    .sort-indicator {
+    .sort-arrow {
       display: inline-block;
-      margin-left: 4px;
-      width: 8px;
-      color: #EEFF00;
+      margin-left: 3px;
+      font-size: 9px;
+      opacity: 0.5;
+      vertical-align: middle;
     }
+    th[data-sorted="true"] .sort-arrow { opacity: 1; color: var(--accent); }
 
+    /* ============================================================
+       TEAM ROWS
+    ============================================================ */
     .team-row {
-      background: rgba(51, 65, 85, 0.7);
+      background: rgba(255,255,255,0.022);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background 0.15s ease;
     }
 
-    .team-row:hover {
-      background: rgba(71, 85, 105, 0.9);
-      transform: translateX(3px);
-    }
+    .team-row:hover { background: rgba(255,255,255,0.052); }
 
     .team-row td {
-      padding: 14px 10px;
+      padding: 13px 10px;
       text-align: center;
-      color: #e2e8f0;
+      color: var(--text-secondary);
       white-space: nowrap;
+      vertical-align: middle;
     }
 
     .team-row td:first-child {
       text-align: left;
       padding-left: 14px;
       font-weight: 600;
-      color: #f1f5f9;
-      border-top-left-radius: 8px;
-      border-bottom-left-radius: 8px;
+      color: var(--text-primary);
+      border-top-left-radius: var(--radius-xs);
+      border-bottom-left-radius: var(--radius-xs);
       position: sticky;
       left: 0;
       background: inherit;
-      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
     }
 
     .team-row td:last-child {
-      border-top-right-radius: 8px;
-      border-bottom-right-radius: 8px;
-      font-weight: bold;
-      color: #EEFF00;
-      font-size: 15px;
+      border-top-right-radius: var(--radius-xs);
+      border-bottom-right-radius: var(--radius-xs);
+      font-weight: 800;
+      color: var(--accent);
+      font-size: 14px;
     }
 
-    .expanded-row {
-      display: none;
+    /* Position badge */
+    .pos-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 5px;
+      font-size: 10px; font-weight: 700;
+      margin-right: 9px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-dim);
+      flex-shrink: 0;
     }
 
-    .expanded-row.open {
-      display: table-row;
-    }
+    /* Zone left-border indicators */
+    .zone-champion  td:first-child { box-shadow: inset 4px 0 0 var(--gold),  2px 0 10px rgba(0,0,0,0.1) !important; }
+    .zone-champion  .pos-num       { background: var(--gold-dim); color: var(--gold); }
+    .zone-promotion td:first-child { box-shadow: inset 4px 0 0 var(--green), 2px 0 10px rgba(0,0,0,0.1) !important; }
+    .zone-promotion .pos-num       { background: var(--green-dim); color: var(--green); }
+    .zone-relegation td:first-child { box-shadow: inset 4px 0 0 var(--red),  2px 0 10px rgba(0,0,0,0.1) !important; }
+    .zone-relegation .pos-num       { background: var(--red-dim); color: var(--red); }
+
+    /* GD & W/D/L colouring */
+    .gd-pos  { color: var(--green) !important; font-weight: 600; }
+    .gd-neg  { color: var(--red)   !important; font-weight: 600; }
+    .gd-zero { color: var(--text-muted) !important; }
+    .stat-w  { color: #4ade80 !important; font-weight: 600; }
+    .stat-d  { color: #fbbf24 !important; font-weight: 600; }
+    .stat-l  { color: #f87171 !important; font-weight: 600; }
+
+    /* ============================================================
+       EXPANDED ROW
+    ============================================================ */
+    .expanded-row { display: none; }
+    .expanded-row.open { display: table-row; }
 
     .expanded-content {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(4,8,16,0.65);
       padding: 20px;
-      border-radius: 10px;
+      border-radius: var(--radius-md);
       overflow-x: auto;
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      border: 1px solid var(--border);
     }
 
+    /* ============================================================
+       PLAYER TABLE
+    ============================================================ */
     .player-table {
       width: 100%;
       border-collapse: collapse;
@@ -460,16 +584,15 @@
       white-space: nowrap;
     }
 
-    .player-table th,
-    .player-table td {
+    .player-table th, .player-table td {
       padding: 8px 10px;
       text-align: right;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
     .player-table th {
       font-weight: 700;
-      color: #EEFF00;
+      color: var(--accent);
       cursor: pointer;
       user-select: none;
       text-transform: uppercase;
@@ -478,69 +601,40 @@
     }
 
     .player-table th:first-child,
-    .player-table td:first-child {
-      text-align: left;
-      font-weight: 600;
-    }
+    .player-table td:first-child { text-align: left; font-weight: 600; }
 
-    .match-section {
-      margin-top: 20px;
-    }
+    .match-section { margin-top: 20px; }
 
     .match-section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #EEFF00;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 13px; font-weight: 700;
+      color: var(--accent); margin-bottom: 12px;
+      text-transform: uppercase; letter-spacing: 0.8px;
     }
 
-    .match-table-wrapper {
-      margin-top: 12px;
-      font-size: 11px;
-      color: #e2e8f0;
-    }
+    .match-table-wrapper { margin-top: 12px; font-size: 11px; color: var(--text-secondary); }
+    .match-table-wrapper table { font-size: 11px; border-collapse: collapse; }
+    .match-table-wrapper th { color: var(--text-muted); padding: 6px 8px; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+    .match-table-wrapper td { padding: 6px 8px; }
 
-    .match-table-wrapper table {
-      font-size: 11px;
-      border-collapse: collapse;
-    }
-
-    .match-table-wrapper th {
-      color: #94a3b8;
-      padding: 6px 8px;
-      text-transform: uppercase;
-      font-size: 10px;
-      letter-spacing: 0.5px;
-    }
-
-    .match-table-wrapper td {
-      padding: 6px 8px;
-    }
-
-    /* Footer */
+    /* ============================================================
+       FOOTER
+    ============================================================ */
     .footer {
       max-width: 1800px;
       margin: 40px auto 0;
       padding: 20px;
       text-align: center;
-      color: #94a3b8;
+      color: var(--text-muted);
       font-size: 13px;
-      background: rgba(30, 41, 59, 0.6);
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
     }
 
-    .footer-content {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: center;
-    }
+    .footer-content { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 
     .footer-link {
-      color: #EEFF00;
+      color: var(--accent);
       text-decoration: none;
       font-weight: 600;
       transition: all 0.2s ease;
@@ -549,100 +643,89 @@
       gap: 6px;
     }
 
-    .footer-link:hover {
-      color: #FFF76B;
-      transform: translateY(-1px);
-    }
+    .footer-link:hover { color: var(--accent-bright); transform: translateY(-1px); }
+    .discord-icon { width: 18px; height: 18px; }
 
-    .discord-icon {
-      width: 18px;
-      height: 18px;
-    }
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(4,8,16,0.5); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.5); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-    /* Optimized scrollbar styling */
-    ::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.5);
-      border-radius: 5px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.5);
-      border-radius: 5px;
-      transition: background 0.2s ease;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #EEFF00;
-    }
-
-    /* Performance optimizations */
-    .team-row, .player-table, .match-table-wrapper {
-      will-change: transform;
-    }
-
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
     @media (max-width: 768px) {
-      .header h1 {
-        font-size: 32px;
-      }
+      body { padding: 16px 12px; }
+      .header { padding: 24px 18px; }
+      .table-wrapper, .controls { padding: 16px; }
+      .search-container { flex-direction: column; }
+      .search-input { width: 100%; }
+      .league-table { font-size: 10px; }
+      .league-table thead th, .team-row td { padding: 9px 5px; }
+    }
 
-      .search-container {
-        flex-direction: column;
-      }
-
-      .search-input {
-        width: 100%;
-      }
-
-      .league-table {
-        font-size: 10px;
-      }
-
-      .league-table th,
-      .league-table td {
-        padding: 10px 6px;
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>⚽ MFL League Table Analytics</h1>
-    <p>Advanced competition statistics, leaderboards, and insights</p>
+    <div class="header-badge">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+      MFL Analytics
+    </div>
+    <h1>League Table Analytics</h1>
+    <p>Advanced competition statistics, player insights &amp; performance metrics</p>
   </div>
 
   <div class="controls">
     <div class="search-container">
-      <input 
-        type="text" 
-        id="search-input" 
-        class="search-input" 
+      <input
+        type="text"
+        id="search-input"
+        class="search-input"
         placeholder="Search competitions by name or ID..."
         autocomplete="off"
+        aria-label="Search competitions"
       />
-      <button id="load-btn" class="btn btn-primary" disabled>Load Competition</button>
-      <button id="favorite-btn" class="btn btn-secondary" style="display:none;">⭐ Add to Favorites</button>
-      <button id="clear-cache-btn" class="btn btn-secondary">🗑️ Clear Cache</button>
+      <button id="load-btn" class="btn btn-primary" disabled aria-label="Load competition">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+        Load
+      </button>
+      <button id="favorite-btn" class="btn btn-secondary" style="display:none;" aria-label="Toggle favorite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        Add to Favorites
+      </button>
+      <button id="clear-cache-btn" class="btn btn-secondary" aria-label="Clear cache">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2v2"/></svg>
+        Clear Cache
+      </button>
       <div id="suggestions" class="suggestions"></div>
     </div>
 
     <div class="favorites-container">
       <div class="favorites-title">
-        <span>⭐</span>
-        <span>Favorite Competitions</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        Favorite Competitions
       </div>
       <div id="favorites-list" class="favorites-list">
-        <span class="empty-favorites">No favorites yet. Load a competition and add it to favorites!</span>
+        <span class="empty-favorites">No favorites yet. Load a competition and add it!</span>
       </div>
     </div>
   </div>
 
   <div id="status-container" class="status-container">
-    <div id="status" class="status-text">Search for a competition to get started</div>
+    <div class="status-inner">
+      <span id="status-spinner" class="spinner" style="display:none;" aria-hidden="true"></span>
+      <div id="status" class="status-text">Search for a competition to get started</div>
+    </div>
   </div>
 
   <div id="table-wrapper" class="table-wrapper" style="display:none;">
@@ -651,7 +734,16 @@
         <div class="competition-title" id="comp-title"></div>
         <div class="competition-meta" id="comp-meta"></div>
       </div>
-      <button id="download-csv-btn" class="btn btn-secondary">📥 Download CSV</button>
+      <button id="download-csv-btn" class="btn btn-secondary" aria-label="Download CSV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download CSV
+      </button>
+    </div>
+
+    <div class="zone-legend">
+      <div class="zone-legend-item"><div class="zone-dot" style="background:var(--gold)"></div>Champion</div>
+      <div class="zone-legend-item"><div class="zone-dot" style="background:var(--green)"></div>Promotion</div>
+      <div class="zone-legend-item"><div class="zone-dot" style="background:var(--red)"></div>Relegation</div>
     </div>
 
     <div id="table-container"></div>
@@ -661,11 +753,11 @@
     <div class="footer-content">
       <p>Built for the MFL community</p>
       <div>
-        <a href="https://discord.com/users/ricky_hyde" target="_blank" class="footer-link">
+        <a href="https://discord.com/users/ricky_hyde" target="_blank" rel="noopener noreferrer" class="footer-link">
           <svg class="discord-icon" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
           </svg>
-          Suggestions? Contact ricky_hyde on Discord
+          Contact ricky_hyde on Discord
         </a>
       </div>
     </div>
@@ -690,6 +782,19 @@
   let globalTeamsMap = null;
   let globalMetadataMap = null;
   let currentTableSort = { column: 'points', asc: false };
+
+  // ============================================================================
+  // XSS HELPER
+  // ============================================================================
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   // ============================================================================
   // STYLES
@@ -2045,59 +2150,74 @@
     const table = document.createElement('table');
     table.className = 'league-table';
 
+    const sa = (col) => {
+      const active = currentTableSort.column === col;
+      const arrow = active ? (currentTableSort.asc ? '▲' : '▼') : '⬍';
+      return `<span class="sort-arrow">${arrow}</span>`;
+    };
+
     const thead = document.createElement('thead');
     thead.innerHTML = `
       <tr>
-        <th data-col="team" style="min-width: 200px;">Team</th>
-        <th data-col="mp">MP</th>
-        <th data-col="w">W</th>
-        <th data-col="d">D</th>
-        <th data-col="l">L</th>
-        <th data-col="gf">GF</th>
-        <th data-col="ga">GA</th>
-        <th data-col="gd">GD</th>
-        <th data-col="avxg" title="Average xG For">Av xG</th>
-        <th data-col="avxga" title="Average xG Against">Av xGA</th>
-        <th data-col="avposs" title="Average Possession">Av Poss</th>
-        <th data-col="avsh" title="Average Shots For">Av Sh</th>
-        <th data-col="avsha" title="Average Shots Against">Av ShA</th>
-        <th data-col="avsot" title="Average Shots on Target">Av SoT</th>
-        <th data-col="avsota" title="Average Shots on Target Against">Av SoTA</th>
-        <th data-col="avfls" title="Average Fouls Committed">Av Fls</th>
-        <th data-col="avcrs" title="Average Crosses">Av Crs</th>
-        <th data-col="crspct" title="Average Cross Accuracy">Crs%</th>
-        <th data-col="avclr" title="Average Clearances">Av Clr</th>
-        <th data-col="paspct" title="Average Pass Accuracy">Pas%</th>
-        <th data-col="avyc" title="Average Yellow Cards">Av YC</th>
-        <th data-col="avrc" title="Average Red Cards">Av RC</th>
-        <th data-col="ovr11" title="Top 11 Overall">Top 11 OVR</th>
-        <th data-col="ovr16" title="Top 16 Overall">Top 16 OVR</th>
-        <th data-col="ovrall" title="All Players Overall">All OVR</th>
-        <th data-col="points" style="min-width: 40px;">Pts</th>
+        <th data-col="team" style="min-width:200px;"${currentTableSort.column==='team'?' data-sorted="true"':''}>Team${sa('team')}</th>
+        <th data-col="mp"${currentTableSort.column==='mp'?' data-sorted="true"':''}>MP${sa('mp')}</th>
+        <th data-col="w"${currentTableSort.column==='w'?' data-sorted="true"':''}>W${sa('w')}</th>
+        <th data-col="d"${currentTableSort.column==='d'?' data-sorted="true"':''}>D${sa('d')}</th>
+        <th data-col="l"${currentTableSort.column==='l'?' data-sorted="true"':''}>L${sa('l')}</th>
+        <th data-col="gf"${currentTableSort.column==='gf'?' data-sorted="true"':''}>GF${sa('gf')}</th>
+        <th data-col="ga"${currentTableSort.column==='ga'?' data-sorted="true"':''}>GA${sa('ga')}</th>
+        <th data-col="gd"${currentTableSort.column==='gd'?' data-sorted="true"':''}>GD${sa('gd')}</th>
+        <th data-col="avxg" title="Average xG For"${currentTableSort.column==='avxg'?' data-sorted="true"':''}>Av xG${sa('avxg')}</th>
+        <th data-col="avxga" title="Average xG Against"${currentTableSort.column==='avxga'?' data-sorted="true"':''}>Av xGA${sa('avxga')}</th>
+        <th data-col="avposs" title="Average Possession"${currentTableSort.column==='avposs'?' data-sorted="true"':''}>Av Poss${sa('avposs')}</th>
+        <th data-col="avsh" title="Average Shots For"${currentTableSort.column==='avsh'?' data-sorted="true"':''}>Av Sh${sa('avsh')}</th>
+        <th data-col="avsha" title="Average Shots Against"${currentTableSort.column==='avsha'?' data-sorted="true"':''}>Av ShA${sa('avsha')}</th>
+        <th data-col="avsot" title="Average Shots on Target"${currentTableSort.column==='avsot'?' data-sorted="true"':''}>Av SoT${sa('avsot')}</th>
+        <th data-col="avsota" title="Average Shots on Target Against"${currentTableSort.column==='avsota'?' data-sorted="true"':''}>Av SoTA${sa('avsota')}</th>
+        <th data-col="avfls" title="Average Fouls"${currentTableSort.column==='avfls'?' data-sorted="true"':''}>Av Fls${sa('avfls')}</th>
+        <th data-col="avcrs" title="Average Crosses"${currentTableSort.column==='avcrs'?' data-sorted="true"':''}>Av Crs${sa('avcrs')}</th>
+        <th data-col="crspct" title="Cross Accuracy"${currentTableSort.column==='crspct'?' data-sorted="true"':''}>Crs%${sa('crspct')}</th>
+        <th data-col="avclr" title="Average Clearances"${currentTableSort.column==='avclr'?' data-sorted="true"':''}>Av Clr${sa('avclr')}</th>
+        <th data-col="paspct" title="Pass Accuracy"${currentTableSort.column==='paspct'?' data-sorted="true"':''}>Pas%${sa('paspct')}</th>
+        <th data-col="avyc" title="Average Yellow Cards"${currentTableSort.column==='avyc'?' data-sorted="true"':''}>Av YC${sa('avyc')}</th>
+        <th data-col="avrc" title="Average Red Cards"${currentTableSort.column==='avrc'?' data-sorted="true"':''}>Av RC${sa('avrc')}</th>
+        <th data-col="ovr11" title="Top 11 Overall"${currentTableSort.column==='ovr11'?' data-sorted="true"':''}>Top 11${sa('ovr11')}</th>
+        <th data-col="ovr16" title="Top 16 Overall"${currentTableSort.column==='ovr16'?' data-sorted="true"':''}>Top 16${sa('ovr16')}</th>
+        <th data-col="ovrall" title="All Players Overall"${currentTableSort.column==='ovrall'?' data-sorted="true"':''}>All OVR${sa('ovrall')}</th>
+        <th data-col="points" style="min-width:40px;"${currentTableSort.column==='points'?' data-sorted="true"':''}>Pts${sa('points')}</th>
       </tr>
     `;
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
 
+    const totalTeams = teams.length;
+
     teams.forEach((team, idx) => {
       const mc = team.matchCount || 1;
       const gd = team.goalsFor - team.goalsAgainst;
       const poss = (team.possessionSum / mc).toFixed(0);
-      const passPct = team.passes > 0 ? ((team.passesAcc / team.passes) * 100).toFixed(0) : 0;
-      const crossPct = team.crosses > 0 ? ((team.crossesAcc / team.crosses) * 100).toFixed(0) : 0;
+      const passPct = team.passes > 0 ? ((team.passesAcc / team.passes) * 100).toFixed(0) : '0';
+      const crossPct = team.crosses > 0 ? ((team.crossesAcc / team.crosses) * 100).toFixed(0) : '0';
+      const gdClass = gd > 0 ? 'gd-pos' : gd < 0 ? 'gd-neg' : 'gd-zero';
+
+      // Zone assignment: champion (1st), promotion (2-4), relegation (bottom 3)
+      let zoneClass = '';
+      if (team.leaguePosition === 1) zoneClass = 'zone-champion';
+      else if (team.leaguePosition <= 4) zoneClass = 'zone-promotion';
+      else if (team.leaguePosition > totalTeams - 3) zoneClass = 'zone-relegation';
 
       const tr = document.createElement('tr');
-      tr.className = 'team-row';
+      tr.className = 'team-row' + (zoneClass ? ' ' + zoneClass : '');
       tr.innerHTML = `
-        <td>${team.leaguePosition}. ${team.teamName}</td>
+        <td><span class="pos-num">${team.leaguePosition}</span>${escapeHtml(team.teamName)}</td>
         <td>${team.matchCount}</td>
-        <td>${team.wins}</td>
-        <td>${team.draws}</td>
-        <td>${team.losses}</td>
+        <td class="stat-w">${team.wins}</td>
+        <td class="stat-d">${team.draws}</td>
+        <td class="stat-l">${team.losses}</td>
         <td>${team.goalsFor}</td>
         <td>${team.goalsAgainst}</td>
-        <td>${gd > 0 ? '+' + gd : gd}</td>
+        <td class="${gdClass}">${gd > 0 ? '+' + gd : gd}</td>
         <td>${(team.xGFor / mc).toFixed(2)}</td>
         <td>${(team.xGAgainst / mc).toFixed(2)}</td>
         <td>${poss}%</td>
@@ -2123,7 +2243,7 @@
       const trExp = document.createElement('tr');
       trExp.className = 'expanded-row';
       const tdExp = document.createElement('td');
-      tdExp.colSpan = 26;
+      tdExp.colSpan = 27;
 
       const content = document.createElement('div');
       content.className = 'expanded-content';
@@ -2152,7 +2272,7 @@
 
           if (!team._formationsLoaded && globalMetadataMap) {
             team._formationsLoaded = true;
-            const prevStatus = document.getElementById('mfl-status')?.textContent;
+            const prevStatus = document.getElementById('status')?.textContent;
             setStatus(`Loading formations for ${team.teamName}...`);
 
             try {
@@ -2320,10 +2440,10 @@
       thHTML += '</tr>';
       thead.innerHTML = thHTML;
 
-      tbody.innerHTML = '';
+      const rowsHtml = [];
       players.forEach((p) => {
-        let row = `<td><b>${p.name}</b>${
-          p.positions.size ? ` (${[...p.positions].join(',')})` : ''
+        let row = `<td><b>${escapeHtml(p.name)}</b>${
+          p.positions.size ? ` (${escapeHtml([...p.positions].join(','))})` : ''
         }</td><td>${p.appearances}</td>`;
         PLAYER_COLS.forEach((c) => {
           let val = 0;
@@ -2340,8 +2460,9 @@
             row += `<td>${c.fmt(val)}</td>`;
           }
         });
-        tbody.innerHTML += `<tr>${row}</tr>`;
+        rowsHtml.push(`<tr>${row}</tr>`);
       });
+      tbody.innerHTML = rowsHtml.join('');
 
       thead.querySelectorAll('th[data-sort]').forEach((th) => {
         th.onclick = () => {
@@ -2454,9 +2575,13 @@
 
   function setStatus(msg, type = 'loading') {
     const el = document.getElementById('status');
+    const spinner = document.getElementById('status-spinner');
     if (el) {
       el.textContent = msg;
       el.className = 'status-text ' + type;
+    }
+    if (spinner) {
+      spinner.style.display = type === 'loading' ? 'inline-block' : 'none';
     }
     console.log('[Status]', msg);
   }
@@ -2528,8 +2653,8 @@
       const div = document.createElement('div');
       div.className = 'favorite-item';
       div.innerHTML = `
-        <span>${fav.name}</span>
-        <span class="favorite-remove" data-id="${fav.id}">×</span>
+        <span>${escapeHtml(fav.name)}</span>
+        <span class="favorite-remove" data-id="${escapeHtml(String(fav.id))}">×</span>
       `;
 
       div.onclick = (e) => {
@@ -2557,13 +2682,14 @@
 
     btn.style.display = 'block';
 
+    const starSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
     if (isFavorite(selectedCompetitionId)) {
-      btn.textContent = '★ Remove from Favorites';
+      btn.innerHTML = `${starSvg} Remove Favorite`;
       btn.onclick = () => {
         removeFromFavorites(selectedCompetitionId);
       };
     } else {
-      btn.textContent = '⭐ Add to Favorites';
+      btn.innerHTML = `${starSvg} Add to Favorites`;
       btn.onclick = () => {
         addToFavorites(currentCompetitionData);
       };
@@ -2619,9 +2745,9 @@
                           '⚪ ' + comp.status;
 
       div.innerHTML = `
-        <div class="suggestion-name">${comp.name}</div>
+        <div class="suggestion-name">${escapeHtml(comp.name)}</div>
         <div class="suggestion-meta">
-          ${statusBadge} | ${comp.type} | ID: ${comp.id} | ${comp.nbParticipants || 0} teams
+          ${escapeHtml(statusBadge)} | ${escapeHtml(comp.type)} | ID: ${escapeHtml(String(comp.id))} | ${escapeHtml(String(comp.nbParticipants || 0))} teams
         </div>
       `;
 
@@ -2657,12 +2783,14 @@
       updateFavoriteButton();
 
       document.getElementById('comp-title').textContent = compJson.name || `Competition ${competitionId}`;
+      const statusVal = String(compJson.status || 'N/A');
+      const badgeCls = statusVal === 'LIVE' ? 'live' : statusVal === 'UPCOMING' ? 'upcoming' : 'ended';
       document.getElementById('comp-meta').innerHTML = `
-        <span><strong>Status:</strong> ${compJson.status || 'N/A'}</span>
-        <span><strong>Type:</strong> ${compJson.type || 'N/A'}</span>
-        <span><strong>Code:</strong> ${compJson.code || 'N/A'}</span>
-        <span><strong>Teams:</strong> ${compJson.nbParticipants || 'N/A'}</span>
-        <span><strong>ID:</strong> ${competitionId}</span>
+        <span class="comp-badge ${badgeCls}">${escapeHtml(statusVal)}</span>
+        <span><strong>Type:</strong> ${escapeHtml(String(compJson.type || 'N/A'))}</span>
+        <span><strong>Code:</strong> ${escapeHtml(String(compJson.code || 'N/A'))}</span>
+        <span><strong>Teams:</strong> ${escapeHtml(String(compJson.nbParticipants || 'N/A'))}</span>
+        <span><strong>ID:</strong> ${escapeHtml(String(competitionId))}</span>
       `;
 
       const metadataMap = extractMatchMetadataFromCompetition(compJson);
