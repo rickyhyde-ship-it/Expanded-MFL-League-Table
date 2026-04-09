@@ -711,6 +711,76 @@
     .stat-l  { color: #f87171 !important; font-weight: 600; }
 
     /* ============================================================
+       POSITION BADGES
+    ============================================================ */
+    .pos-badge {
+      display: inline-block; padding: 1px 5px; border-radius: 3px;
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px;
+      white-space: nowrap; margin: 1px 1px 1px 0;
+    }
+    .pos-gk  { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .pos-def { background: rgba(34,197,94,0.12);  color: #4ade80; }
+    .pos-mid { background: rgba(96,165,250,0.12); color: #60a5fa; }
+    .pos-att { background: rgba(239,68,68,0.12);  color: #f87171; }
+
+    /* ============================================================
+       SHOT ANALYSIS PANEL
+    ============================================================ */
+    .shot-analysis-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px; align-items: start;
+    }
+    @media (max-width: 768px) { .shot-analysis-grid { grid-template-columns: 1fr; } }
+    .shot-panel {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .shot-panel-for     { border-color: rgba(34,197,94,0.25); }
+    .shot-panel-against { border-color: rgba(239,68,68,0.25); }
+    .shot-panel-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 10px;
+    }
+    .shot-panel-for .shot-panel-title     { color: #4ade80; }
+    .shot-panel-against .shot-panel-title { color: #f87171; }
+    .shot-panel-stats {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 6px;
+    }
+    .shot-stat { text-align: center; }
+    .shot-stat-val { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+    .shot-stat-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .shot-accuracy-bar {
+      display: flex; height: 7px; border-radius: 4px; overflow: hidden;
+      background: rgba(255,255,255,0.04); gap: 1px; margin-top: 10px;
+    }
+    .shot-accuracy-bar div { height: 100%; border-radius: 2px; transition: width 0.3s; }
+    .shot-bar-labels {
+      display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;
+      font-size: 9px; font-family: 'JetBrains Mono', monospace;
+    }
+    .shot-metrics {
+      display: flex; gap: 14px; margin-top: 10px; padding-top: 8px;
+      border-top: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .shot-metric-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-right: 3px; }
+    .shot-metric-val   { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+    .shot-xg-compare {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 8px 14px; text-align: center; gap: 2px;
+    }
+    .shot-xg-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .shot-xg-value { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .shot-trend-bar {
+      display: flex; align-items: flex-end; gap: 3px;
+      background: rgba(255,255,255,0.02); border-radius: var(--radius-sm);
+      padding: 8px 10px; border: 1px solid var(--border);
+    }
+
+    /* ============================================================
        EXPANDED ROW
     ============================================================ */
     .expanded-row { display: none; }
@@ -932,6 +1002,7 @@
   // CONSTANTS & GLOBALS
   // ============================================================================
   const API_BASE = 'https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod';
+  const POSITION_ORDER = ['GK','RB','RWB','CB','LB','LWB','CDM','DM','RM','LM','CM','CAM','AM','RW','LW','CF','ST'];
 
   let globalTeamsMap = null;
   let globalMetadataMap = null;
@@ -2490,6 +2561,180 @@
     `;
   }
 
+  // ============================================================================
+  // HELPERS: POSITION BADGE
+  // ============================================================================
+  function getPositionBadge(pos) {
+    const u = pos.toUpperCase();
+    const safe = escapeHtml(pos);
+    if (u === 'GK')                                          return `<span class="pos-badge pos-gk">${safe}</span>`;
+    if (['CB','LB','RB','LWB','RWB','SW'].includes(u))      return `<span class="pos-badge pos-def">${safe}</span>`;
+    if (['CDM','DM','RM','LM','CM'].includes(u))            return `<span class="pos-badge pos-mid">${safe}</span>`;
+    if (['CAM','AM','RW','LW','CF','ST','SS'].includes(u))  return `<span class="pos-badge pos-att">${safe}</span>`;
+    // Fallback heuristics
+    if (u.startsWith('G'))                                   return `<span class="pos-badge pos-gk">${safe}</span>`;
+    if (u.startsWith('ST') || u.startsWith('CF') || u.startsWith('FW')) return `<span class="pos-badge pos-att">${safe}</span>`;
+    if (u.startsWith('CB') || u.endsWith('B'))              return `<span class="pos-badge pos-def">${safe}</span>`;
+    return `<span class="pos-badge pos-mid">${safe}</span>`;
+  }
+
+  // ============================================================================
+  // EXPANDED ROW: SHOT ANALYSIS
+  // ============================================================================
+  function buildShotAnalysis(team) {
+    const mc = team.matchCount || 1;
+    const sf = team.shotsFor, sa = team.shotsAgainst;
+    const sotF = team.sotFor, sotA = team.sotAgainst;
+    const xgF = team.xGFor, xgA = team.xGAgainst;
+    const gF = team.goalsFor, gA = team.goalsAgainst;
+
+    // Derived
+    const shotAccF  = sf  > 0 ? (sotF  / sf  * 100).toFixed(0) : '0';
+    const shotAccA  = sa  > 0 ? (sotA  / sa  * 100).toFixed(0) : '0';
+    const convF     = sotF > 0 ? (gF    / sotF * 100).toFixed(0) : '0';
+    const convA     = sotA > 0 ? (gA    / sotA * 100).toFixed(0) : '0';
+    const xgDiff    = (xgF - xgA).toFixed(2);
+    const xgDiffPos = parseFloat(xgDiff) >= 0;
+
+    // For stacked bars — Goals / SOT (non-goal) / Off-target proportions
+    const fG = gF, fS = Math.max(0, sotF - gF), fO = Math.max(0, sf - sotF), fT = Math.max(fG + fS + fO, 1);
+    const aG = gA, aS = Math.max(0, sotA - gA), aO = Math.max(0, sa - sotA), aT = Math.max(aG + aS + aO, 1);
+    const pct = (n, t) => ((n / t) * 100).toFixed(1);
+
+    // Per-match trend sparkline
+    const matchesSorted = [...team.matchDetails].sort((a, b) => {
+      return (a.date ? new Date(a.date).getTime() : 0) - (b.date ? new Date(b.date).getTime() : 0);
+    });
+    const maxSh = Math.max(...matchesSorted.map(m => Math.max(m.shotsFor || 0, m.shotsAgainst || 0)), 1);
+    const SPARK_H = 44;
+    const sparkBars = matchesSorted.map(m => {
+      const res = m.scoreFor > m.scoreAgainst ? 'W' : m.scoreFor < m.scoreAgainst ? 'L' : 'D';
+      const col = res === 'W' ? '#22c55e' : res === 'D' ? '#fbbf24' : '#f87171';
+      const hF = Math.max(2, Math.round((m.shotsFor    || 0) / maxSh * SPARK_H));
+      const hA = Math.max(2, Math.round((m.shotsAgainst || 0) / maxSh * SPARK_H));
+      const oppTeam  = (m.opponentClubId && globalTeamsMap) ? globalTeamsMap.get(m.opponentClubId) : null;
+      const oppLabel = oppTeam ? oppTeam.teamName : (m.opponentClubId || '?');
+      const tipFor   = `vs ${oppLabel} (${res}) — Sh: ${m.shotsFor}, SOT: ${m.sotFor}, xG: ${(m.xGFor||0).toFixed(2)}`;
+      const tipAgainst = `vs ${oppLabel} — ShA: ${m.shotsAgainst}, SOTA: ${m.sotAgainst}, xGA: ${(m.xGAgainst||0).toFixed(2)}`;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex:1;min-width:6px;max-width:18px">` +
+        `<div title="${escapeHtml(tipFor)}" style="width:100%;height:${hF}px;background:${col};border-radius:2px 2px 0 0;opacity:0.9;cursor:default"></div>` +
+        `<div title="${escapeHtml(tipAgainst)}" style="width:100%;height:${hA}px;background:rgba(239,68,68,0.45);border-radius:0 0 2px 2px;cursor:default"></div>` +
+        `</div>`;
+    }).join('');
+
+    return `
+      <div class="expand-section-title">Shot Analysis</div>
+      <div class="shot-analysis-grid">
+        <div class="shot-panel shot-panel-for">
+          <div class="shot-panel-title">Attacking — Shots For</div>
+          <div class="shot-panel-stats">
+            <div class="shot-stat">
+              <div class="shot-stat-val">${sf}</div>
+              <div class="shot-stat-lbl">Shots</div>
+            </div>
+            <div class="shot-stat">
+              <div class="shot-stat-val" style="color:#60a5fa">${sotF}</div>
+              <div class="shot-stat-lbl">On Tgt</div>
+            </div>
+            <div class="shot-stat">
+              <div class="shot-stat-val" style="color:#fbbf24">${xgF.toFixed(1)}</div>
+              <div class="shot-stat-lbl">xG</div>
+            </div>
+            <div class="shot-stat">
+              <div class="shot-stat-val" style="color:#22c55e">${gF}</div>
+              <div class="shot-stat-lbl">Goals</div>
+            </div>
+          </div>
+          <div class="shot-accuracy-bar">
+            <div title="Goals (${pct(fG,fT)}%)" style="width:${pct(fG,fT)}%;background:#fbbf24"></div>
+            <div title="On Target (${pct(fS,fT)}%)" style="width:${pct(fS,fT)}%;background:#60a5fa"></div>
+            <div title="Off Target (${pct(fO,fT)}%)" style="width:${pct(fO,fT)}%;background:#475569"></div>
+          </div>
+          <div class="shot-bar-labels">
+            <span style="color:#fbbf24">Goals ${pct(fG,fT)}%</span>
+            <span style="color:#60a5fa">SOT ${pct(fS,fT)}%</span>
+            <span style="color:#64748b">Off ${pct(fO,fT)}%</span>
+          </div>
+          <div class="shot-metrics">
+            <div><span class="shot-metric-label">Acc</span><span class="shot-metric-val">${shotAccF}%</span></div>
+            <div><span class="shot-metric-label">Conv</span><span class="shot-metric-val">${convF}%</span></div>
+            <div><span class="shot-metric-label">xG/Sh</span><span class="shot-metric-val">${sf > 0 ? (xgF / sf).toFixed(3) : '0.000'}</span></div>
+            <div><span class="shot-metric-label">Sh/G</span><span class="shot-metric-val">${(sf / mc).toFixed(1)}</span></div>
+          </div>
+        </div>
+
+        <div class="shot-xg-compare">
+          <div class="shot-xg-label">xG Diff</div>
+          <div class="shot-xg-value" style="color:${xgDiffPos?'#22c55e':'#f87171'}">${xgDiffPos?'+':''}${xgDiff}</div>
+          <div style="height:1px;width:50px;background:var(--border);margin:8px auto"></div>
+          <div class="shot-xg-label">Shots/Game</div>
+          <div style="font-size:14px;font-weight:700;color:#4ade80">${(sf/mc).toFixed(1)}</div>
+          <div class="shot-xg-label">vs</div>
+          <div style="font-size:14px;font-weight:700;color:#f87171">${(sa/mc).toFixed(1)}</div>
+          <div style="height:1px;width:50px;background:var(--border);margin:8px auto"></div>
+          <div class="shot-xg-label">xG/Game</div>
+          <div style="font-size:14px;font-weight:700;color:#fbbf24">${(xgF/mc).toFixed(2)}</div>
+          <div class="shot-xg-label">vs</div>
+          <div style="font-size:14px;font-weight:700;color:rgba(239,68,68,0.8)">${(xgA/mc).toFixed(2)}</div>
+        </div>
+
+        <div class="shot-panel shot-panel-against">
+          <div class="shot-panel-title">Defensive — Shots Against</div>
+          <div class="shot-panel-stats">
+            <div class="shot-stat">
+              <div class="shot-stat-val">${sa}</div>
+              <div class="shot-stat-lbl">Shots</div>
+            </div>
+            <div class="shot-stat">
+              <div class="shot-stat-val" style="color:#60a5fa">${sotA}</div>
+              <div class="shot-stat-lbl">On Tgt</div>
+            </div>
+            <div class="shot-stat">
+              <div class="shot-stat-val" style="color:#fbbf24">${xgA.toFixed(1)}</div>
+              <div class="shot-stat-lbl">xGA</div>
+            </div>
+            <div class="shot-stat">
+              <div class="shot-stat-val" style="color:#f87171">${gA}</div>
+              <div class="shot-stat-lbl">Conceded</div>
+            </div>
+          </div>
+          <div class="shot-accuracy-bar">
+            <div title="Goals conceded (${pct(aG,aT)}%)" style="width:${pct(aG,aT)}%;background:#ef4444"></div>
+            <div title="On Target (${pct(aS,aT)}%)" style="width:${pct(aS,aT)}%;background:#60a5fa"></div>
+            <div title="Off Target (${pct(aO,aT)}%)" style="width:${pct(aO,aT)}%;background:#475569"></div>
+          </div>
+          <div class="shot-bar-labels">
+            <span style="color:#f87171">Conceded ${pct(aG,aT)}%</span>
+            <span style="color:#60a5fa">SOT ${pct(aS,aT)}%</span>
+            <span style="color:#64748b">Off ${pct(aO,aT)}%</span>
+          </div>
+          <div class="shot-metrics">
+            <div><span class="shot-metric-label">Acc</span><span class="shot-metric-val">${shotAccA}%</span></div>
+            <div><span class="shot-metric-label">Conv</span><span class="shot-metric-val">${convA}%</span></div>
+            <div><span class="shot-metric-label">xGA/Sh</span><span class="shot-metric-val">${sa > 0 ? (xgA / sa).toFixed(3) : '0.000'}</span></div>
+            <div><span class="shot-metric-label">ShA/G</span><span class="shot-metric-val">${(sa / mc).toFixed(1)}</span></div>
+          </div>
+        </div>
+      </div>
+
+      ${matchesSorted.length > 0 ? `
+      <div style="margin-top:14px">
+        <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">
+          Shot Trend — Per Match &nbsp;<span style="font-weight:400;color:var(--text-dim)">(hover for details)</span>
+        </div>
+        <div class="shot-trend-bar" style="height:${SPARK_H * 2 + 16}px">
+          ${sparkBars}
+        </div>
+        <div style="display:flex;gap:16px;margin-top:6px;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--text-muted)">
+          <span><span style="display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:1px;margin-right:3px;vertical-align:middle"></span>Sh For (W)</span>
+          <span><span style="display:inline-block;width:8px;height:8px;background:#fbbf24;border-radius:1px;margin-right:3px;vertical-align:middle"></span>Sh For (D)</span>
+          <span><span style="display:inline-block;width:8px;height:8px;background:#f87171;border-radius:1px;margin-right:3px;vertical-align:middle"></span>Sh For (L)</span>
+          <span><span style="display:inline-block;width:8px;height:8px;background:rgba(239,68,68,0.45);border-radius:1px;margin-right:3px;vertical-align:middle"></span>Sh Against</span>
+        </div>
+      </div>` : ''}
+    `;
+  }
+
   function rebuildMatchSection(container, team, activeFilter) {
     activeFilter = activeFilter || 'all';
     const sorted = [...team.matchDetails].sort((a, b) => {
@@ -2675,6 +2920,12 @@
       formationDiv.innerHTML = buildFormationRecord(team);
       content.appendChild(formationDiv);
 
+      // ---- SHOT ANALYSIS ----
+      const shotDiv = document.createElement('div');
+      shotDiv.className = 'expand-section';
+      shotDiv.innerHTML = buildShotAnalysis(team);
+      content.appendChild(shotDiv);
+
       // ---- PLAYER TABLE ----
       const playerTableDiv = document.createElement('div');
       playerTableDiv.className = 'expand-section';
@@ -2852,6 +3103,17 @@
         if (sortCol === 'appearances') {
           return sortAsc ? a.appearances - b.appearances : b.appearances - a.appearances;
         }
+        if (sortCol === 'pos') {
+          const posVal = (p) => {
+            let min = 999;
+            p.positions.forEach(pos => {
+              const i = POSITION_ORDER.indexOf(pos.toUpperCase());
+              if (i !== -1 && i < min) min = i;
+            });
+            return min;
+          };
+          return sortAsc ? posVal(a) - posVal(b) : posVal(b) - posVal(a);
+        }
 
         const col = PLAYER_COLS.find((c) => c.id === sortCol);
         if (!col) return 0;
@@ -2873,7 +3135,7 @@
           : getVal(b, col) - getVal(a, col);
       });
 
-      let thHTML = '<tr><th data-sort="name">Player</th><th data-sort="appearances">Apps</th>';
+      let thHTML = '<tr><th data-sort="name">Player</th><th data-sort="pos" title="Position(s)">Pos</th><th data-sort="appearances">Apps</th>';
       PLAYER_COLS.forEach((c) => {
         thHTML += `<th data-sort="${c.id}" title="${c.name}">${c.lbl}</th>`;
       });
@@ -2882,9 +3144,15 @@
 
       const rowsHtml = [];
       players.forEach((p) => {
-        let row = `<td><b>${escapeHtml(p.name)}</b>${
-          p.positions.size ? ` (${escapeHtml([...p.positions].join(','))})` : ''
-        }</td><td>${p.appearances}</td>`;
+        // Build position badges sorted by POSITION_ORDER
+        const sortedPos = [...p.positions].sort((a, b) => {
+          const ia = POSITION_ORDER.indexOf(a.toUpperCase()), ib = POSITION_ORDER.indexOf(b.toUpperCase());
+          return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        });
+        const posBadgesHtml = sortedPos.length
+          ? sortedPos.map(pos => getPositionBadge(pos)).join('')
+          : '<span style="color:var(--text-dim);font-size:10px">—</span>';
+        let row = `<td><b>${escapeHtml(p.name)}</b></td><td>${posBadgesHtml}</td><td>${p.appearances}</td>`;
         PLAYER_COLS.forEach((c) => {
           let val = 0;
           if (c.isPct) {
