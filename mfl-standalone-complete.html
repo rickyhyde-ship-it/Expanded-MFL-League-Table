@@ -543,13 +543,164 @@
       flex-shrink: 0;
     }
 
-    /* Zone left-border indicators */
-    .zone-champion  td:first-child { box-shadow: inset 4px 0 0 var(--gold),  2px 0 10px rgba(0,0,0,0.1) !important; }
-    .zone-champion  .pos-num       { background: var(--gold-dim); color: var(--gold); }
-    .zone-promotion td:first-child { box-shadow: inset 4px 0 0 var(--green), 2px 0 10px rgba(0,0,0,0.1) !important; }
-    .zone-promotion .pos-num       { background: var(--green-dim); color: var(--green); }
-    .zone-relegation td:first-child { box-shadow: inset 4px 0 0 var(--red),  2px 0 10px rgba(0,0,0,0.1) !important; }
-    .zone-relegation .pos-num       { background: var(--red-dim); color: var(--red); }
+    /* Zone background tints + left-border */
+    .zone-champion   { background: rgba(251,191,36,0.055) !important; }
+    .zone-champion   td:first-child { box-shadow: inset 4px 0 0 var(--gold)  !important; }
+    .zone-champion   .pos-num { background: var(--gold-dim); color: var(--gold); }
+
+    .zone-playoff    { background: rgba(34,197,94,0.04) !important; }
+    .zone-playoff    td:first-child { box-shadow: inset 4px 0 0 var(--green) !important; }
+    .zone-playoff    .pos-num { background: var(--green-dim); color: var(--green); }
+
+    .zone-relplayoff { background: rgba(249,115,22,0.04) !important; }
+    .zone-relplayoff td:first-child { box-shadow: inset 4px 0 0 #f97316 !important; }
+    .zone-relplayoff .pos-num { background: rgba(249,115,22,0.14); color: #f97316; }
+
+    .zone-relegation { background: rgba(239,68,68,0.055) !important; }
+    .zone-relegation td:first-child { box-shadow: inset 4px 0 0 var(--red) !important; }
+    .zone-relegation .pos-num { background: var(--red-dim); color: var(--red); }
+
+    /* ============================================================
+       ZONE LEGEND
+    ============================================================ */
+    .zone-legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; align-items: center; }
+    .zone-legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
+    .zone-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+    /* ============================================================
+       FORM BUBBLES
+    ============================================================ */
+    .form-dots { display: flex; gap: 4px; justify-content: center; align-items: center; }
+    .form-dot {
+      width: 18px; height: 18px; border-radius: 5px;
+      font-size: 9px; font-weight: 800; display: inline-flex;
+      align-items: center; justify-content: center; letter-spacing: 0;
+    }
+    .form-dot.W { background: rgba(34,197,94,0.2);  color: #4ade80; }
+    .form-dot.D { background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .form-dot.L { background: rgba(239,68,68,0.2);  color: #f87171; }
+
+    /* ============================================================
+       LEAGUE STATS SUMMARY BAR
+    ============================================================ */
+    .league-stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-card-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted);
+    }
+    .stat-card-value {
+      font-size: 22px; font-weight: 800; color: var(--text-primary);
+      line-height: 1.1;
+    }
+    .stat-card-sub { font-size: 11px; color: var(--text-dim); }
+    .stat-card.accent .stat-card-value { color: var(--accent); }
+    .stat-card.green  .stat-card-value { color: var(--green); }
+    .stat-card.red    .stat-card-value { color: var(--red); }
+    .stat-card.gold   .stat-card-value { color: var(--gold); }
+
+    /* ============================================================
+       EXPANDED ROW — SECTIONS
+    ============================================================ */
+    .expand-section { margin-bottom: 22px; }
+    .expand-section-title {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .expand-section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Team overview stat row */
+    .team-overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px; margin-bottom: 4px;
+    }
+    .team-stat-pill {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .team-stat-pill-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .team-stat-pill-value { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+
+    /* Score distribution */
+    .score-dist-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+    .score-card {
+      display: flex; flex-direction: column; align-items: center;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 8px 12px; min-width: 60px;
+      cursor: default; transition: border-color 0.15s;
+    }
+    .score-card:hover { border-color: var(--border-bright); }
+    .score-card.win   { border-color: rgba(34,197,94,0.3);  background: rgba(34,197,94,0.06); }
+    .score-card.draw  { border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.06); }
+    .score-card.loss  { border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.06); }
+    .score-card-score { font-size: 14px; font-weight: 800; color: var(--text-primary); }
+    .score-card-count { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Formation record table */
+    .formation-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .formation-table th {
+      text-align: center; padding: 7px 10px; color: var(--text-muted);
+      font-weight: 700; text-transform: uppercase; font-size: 10px;
+      letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
+    }
+    .formation-table th:first-child { text-align: left; }
+    .formation-table td {
+      padding: 8px 10px; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: var(--text-secondary);
+    }
+    .formation-table td:first-child { text-align: left; font-weight: 600; color: var(--text-primary); }
+    .formation-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+    /* Match filter buttons */
+    .match-filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 5px 14px; border-radius: 99px; font-size: 12px;
+      font-weight: 600; border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+      font-family: inherit;
+    }
+    .filter-btn:hover { border-color: var(--border-bright); color: var(--text-primary); }
+    .filter-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .filter-btn.fw { color: #4ade80; border-color: rgba(34,197,94,0.3); }
+    .filter-btn.fw.active { background: rgba(34,197,94,0.12); }
+    .filter-btn.fd { color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+    .filter-btn.fd.active { background: rgba(251,191,36,0.12); }
+    .filter-btn.fl { color: #f87171; border-color: rgba(239,68,68,0.3); }
+    .filter-btn.fl.active { background: rgba(239,68,68,0.12); }
+
+    /* Match row result tinting */
+    .match-row-w td { background: rgba(34,197,94,0.04); }
+    .match-row-d td { background: rgba(251,191,36,0.04); }
+    .match-row-l td { background: rgba(239,68,68,0.04); }
+    .match-row-hidden { display: none; }
+    .result-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 5px;
+      font-size: 10px; font-weight: 800;
+    }
+    .result-badge.W { background: rgba(34,197,94,0.2);  color: #4ade80; }
+    .result-badge.D { background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .result-badge.L { background: rgba(239,68,68,0.2);  color: #f87171; }
 
     /* GD & W/D/L colouring */
     .gd-pos  { color: var(--green) !important; font-weight: 600; }
@@ -740,9 +891,12 @@
       </button>
     </div>
 
+    <div id="league-stats-bar" class="league-stats-bar" style="display:none;"></div>
+
     <div class="zone-legend">
       <div class="zone-legend-item"><div class="zone-dot" style="background:var(--gold)"></div>Champion</div>
-      <div class="zone-legend-item"><div class="zone-dot" style="background:var(--green)"></div>Promotion</div>
+      <div class="zone-legend-item"><div class="zone-dot" style="background:var(--green)"></div>Play-off</div>
+      <div class="zone-legend-item"><div class="zone-dot" style="background:#f97316"></div>Relegation Play-off</div>
       <div class="zone-legend-item"><div class="zone-dot" style="background:var(--red)"></div>Relegation</div>
     </div>
 
@@ -1986,6 +2140,122 @@
 
 
   // ============================================================================
+  // HELPER: RECENT FORM (last N matches, sorted by date)
+  // ============================================================================
+  function getRecentForm(team, n = 5) {
+    const sorted = [...team.matchDetails].sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return da - db;
+    });
+    return sorted.slice(-n).map(m => {
+      if (m.scoreFor > m.scoreAgainst) return 'W';
+      if (m.scoreFor < m.scoreAgainst) return 'L';
+      return 'D';
+    });
+  }
+
+  // ============================================================================
+  // HELPER: SCORE DISTRIBUTION
+  // ============================================================================
+  function getScoreDistribution(team) {
+    const dist = new Map();
+    team.matchDetails.forEach(m => {
+      const key = `${m.scoreFor}-${m.scoreAgainst}`;
+      dist.set(key, (dist.get(key) || 0) + 1);
+    });
+    // Sort: wins first, then draws, then losses; within each by frequency
+    const entries = [...dist.entries()].map(([score, count]) => {
+      const [sf, sa] = score.split('-').map(Number);
+      const result = sf > sa ? 'win' : sf < sa ? 'loss' : 'draw';
+      return { score, count, result, sf, sa };
+    });
+    entries.sort((a, b) => {
+      const order = { win: 0, draw: 1, loss: 2 };
+      if (order[a.result] !== order[b.result]) return order[a.result] - order[b.result];
+      return b.count - a.count;
+    });
+    return entries;
+  }
+
+  // ============================================================================
+  // HELPER: FORMATION RECORD
+  // ============================================================================
+  function getFormationRecord(team) {
+    const record = new Map();
+    team.matchDetails.forEach(m => {
+      const opp = m.oppFormation || 'Unknown';
+      if (!record.has(opp)) record.set(opp, { w: 0, d: 0, l: 0, gf: 0, ga: 0 });
+      const r = record.get(opp);
+      r.gf += m.scoreFor;
+      r.ga += m.scoreAgainst;
+      if (m.scoreFor > m.scoreAgainst) r.w++;
+      else if (m.scoreFor < m.scoreAgainst) r.l++;
+      else r.d++;
+    });
+    return [...record.entries()]
+      .map(([formation, r]) => ({ formation, ...r, played: r.w + r.d + r.l }))
+      .sort((a, b) => b.played - a.played);
+  }
+
+  // ============================================================================
+  // HELPER: LEAGUE STATS BAR
+  // ============================================================================
+  function renderLeagueStatsBar(teamsMap) {
+    const bar = document.getElementById('league-stats-bar');
+    if (!bar) return;
+    const teams = [...teamsMap.values()];
+    if (!teams.length) { bar.style.display = 'none'; return; }
+
+    const totalMatches = teams.reduce((s, t) => s + t.matchCount, 0) / 2;
+    const totalGoals  = teams.reduce((s, t) => s + t.goalsFor, 0) / 2;
+    const avgGoalsPer = totalMatches > 0 ? (totalGoals / totalMatches).toFixed(2) : '0.00';
+    const avgPoss     = (teams.reduce((s, t) => s + (t.possessionSum / (t.matchCount||1)), 0) / teams.length).toFixed(0);
+    const topScorer   = [...teams].sort((a,b) => b.goalsFor - a.goalsFor)[0];
+    const avgxG       = (teams.reduce((s, t) => s + t.xGFor / (t.matchCount||1), 0) / teams.length).toFixed(2);
+    const mostCleanSheets = [...teams].sort((a,b) => {
+      const csA = a.matchDetails.filter(m => m.scoreAgainst === 0).length;
+      const csB = b.matchDetails.filter(m => m.scoreAgainst === 0).length;
+      return csB - csA;
+    })[0];
+    const csCount = mostCleanSheets ? mostCleanSheets.matchDetails.filter(m => m.scoreAgainst === 0).length : 0;
+
+    bar.style.display = 'grid';
+    bar.innerHTML = `
+      <div class="stat-card accent">
+        <div class="stat-card-label">Teams</div>
+        <div class="stat-card-value">${teams.length}</div>
+        <div class="stat-card-sub">${Math.round(totalMatches)} matches played</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-card-label">Goals / Game</div>
+        <div class="stat-card-value">${avgGoalsPer}</div>
+        <div class="stat-card-sub">${Math.round(totalGoals)} total goals</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-card-label">Avg xG / Game</div>
+        <div class="stat-card-value">${avgxG}</div>
+        <div class="stat-card-sub">League average</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Avg Possession</div>
+        <div class="stat-card-value">${avgPoss}%</div>
+        <div class="stat-card-sub">League average</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-card-label">Top Scorer (Team)</div>
+        <div class="stat-card-value">${topScorer ? topScorer.goalsFor : 0}</div>
+        <div class="stat-card-sub">${topScorer ? escapeHtml(topScorer.teamName) : '—'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Most Clean Sheets</div>
+        <div class="stat-card-value">${csCount}</div>
+        <div class="stat-card-sub">${mostCleanSheets ? escapeHtml(mostCleanSheets.teamName) : '—'}</div>
+      </div>
+    `;
+  }
+
+  // ============================================================================
   // UI: SORT TEAMS
   // ============================================================================
   function sortTeams(teamsMap) {
@@ -2125,6 +2395,134 @@
   }
 
   // ============================================================================
+  // EXPANDED ROW BUILDERS
+  // ============================================================================
+  function buildTeamOverview(team) {
+    const mc = team.matchCount || 1;
+    const winPct = mc > 0 ? ((team.wins / mc) * 100).toFixed(0) : 0;
+    const gd = team.goalsFor - team.goalsAgainst;
+    const cleanSheets = team.matchDetails.filter(m => m.scoreAgainst === 0).length;
+    const avgGoals = (team.goalsFor / mc).toFixed(2);
+    const avgConceded = (team.goalsAgainst / mc).toFixed(2);
+    const avgXG = (team.xGFor / mc).toFixed(2);
+    const avgPoss = (team.possessionSum / mc).toFixed(0);
+
+    return `
+      <div class="expand-section-title">Team Overview</div>
+      <div class="team-overview-grid">
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">Win %</div>
+          <div class="team-stat-pill-value" style="color:var(--green)">${winPct}%</div>
+        </div>
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">Goals / Game</div>
+          <div class="team-stat-pill-value">${avgGoals}</div>
+        </div>
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">Conceded / Game</div>
+          <div class="team-stat-pill-value" style="color:var(--red)">${avgConceded}</div>
+        </div>
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">xG / Game</div>
+          <div class="team-stat-pill-value" style="color:var(--accent)">${avgXG}</div>
+        </div>
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">Possession</div>
+          <div class="team-stat-pill-value">${avgPoss}%</div>
+        </div>
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">Goal Diff</div>
+          <div class="team-stat-pill-value" style="color:${gd>=0?'var(--green)':'var(--red)'}">${gd>0?'+'+gd:gd}</div>
+        </div>
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">Clean Sheets</div>
+          <div class="team-stat-pill-value" style="color:var(--green)">${cleanSheets}</div>
+        </div>
+        <div class="team-stat-pill">
+          <div class="team-stat-pill-label">Record</div>
+          <div class="team-stat-pill-value" style="font-size:13px;"><span style="color:#4ade80">${team.wins}W</span> <span style="color:#fbbf24">${team.draws}D</span> <span style="color:#f87171">${team.losses}L</span></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildScoreDistribution(team) {
+    const entries = getScoreDistribution(team);
+    if (!entries.length) return '';
+    const cards = entries.map(e => `
+      <div class="score-card ${e.result}">
+        <div class="score-card-score">${e.score}</div>
+        <div class="score-card-count">×${e.count}</div>
+      </div>
+    `).join('');
+    return `
+      <div class="expand-section-title">Score Distribution</div>
+      <div class="score-dist-grid">${cards}</div>
+    `;
+  }
+
+  function buildFormationRecord(team) {
+    const records = getFormationRecord(team);
+    if (!records.length || records.every(r => r.formation === 'Unknown')) return '';
+    const rows = records.map(r => {
+      const winPct = r.played > 0 ? ((r.w / r.played) * 100).toFixed(0) : 0;
+      return `
+        <tr>
+          <td>${escapeHtml(r.formation)}</td>
+          <td class="stat-w">${r.w}</td>
+          <td class="stat-d">${r.d}</td>
+          <td class="stat-l">${r.l}</td>
+          <td>${r.played}</td>
+          <td>${r.gf}</td>
+          <td>${r.ga}</td>
+          <td style="color:var(--accent)">${winPct}%</td>
+        </tr>
+      `;
+    }).join('');
+    return `
+      <div class="expand-section-title">Record vs Opponent Formation</div>
+      <table class="formation-table">
+        <thead><tr>
+          <th>Formation</th><th>W</th><th>D</th><th>L</th><th>P</th><th>GF</th><th>GA</th><th>Win%</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function rebuildMatchSection(container, team, activeFilter) {
+    activeFilter = activeFilter || 'all';
+    const sorted = [...team.matchDetails].sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return da - db;
+    });
+
+    // Count per result
+    const wCount = sorted.filter(m => m.scoreFor > m.scoreAgainst).length;
+    const dCount = sorted.filter(m => m.scoreFor === m.scoreAgainst).length;
+    const lCount = sorted.filter(m => m.scoreFor < m.scoreAgainst).length;
+
+    container.innerHTML = `
+      <div class="expand-section-title">Match History</div>
+      <div class="match-filter-bar">
+        <button class="filter-btn ${activeFilter==='all'?'active':''}" data-filter="all">All (${sorted.length})</button>
+        <button class="filter-btn fw ${activeFilter==='w'?'active':''}" data-filter="w">Wins (${wCount})</button>
+        <button class="filter-btn fd ${activeFilter==='d'?'active':''}" data-filter="d">Draws (${dCount})</button>
+        <button class="filter-btn fl ${activeFilter==='l'?'active':''}" data-filter="l">Losses (${lCount})</button>
+      </div>
+    `;
+
+    const matchTable = createMatchTable(team, activeFilter);
+    container.appendChild(matchTable);
+
+    // Wire filter buttons
+    container.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.onclick = () => rebuildMatchSection(container, team, btn.dataset.filter);
+    });
+  }
+
+  // ============================================================================
   // UI: RENDER LEAGUE TABLE
   // ============================================================================
   function renderLeagueTable(teamsMap) {
@@ -2145,6 +2543,8 @@
       team.leaguePosition = idx + 1;
     });
 
+    renderLeagueStatsBar(teamsMap);
+
     const teams = sortTeams(teamsMap);
 
     const table = document.createElement('table');
@@ -2160,6 +2560,7 @@
     thead.innerHTML = `
       <tr>
         <th data-col="team" style="min-width:200px;"${currentTableSort.column==='team'?' data-sorted="true"':''}>Team${sa('team')}</th>
+        <th title="Last 5 matches (most recent right)" style="min-width:100px;">Form</th>
         <th data-col="mp"${currentTableSort.column==='mp'?' data-sorted="true"':''}>MP${sa('mp')}</th>
         <th data-col="w"${currentTableSort.column==='w'?' data-sorted="true"':''}>W${sa('w')}</th>
         <th data-col="d"${currentTableSort.column==='d'?' data-sorted="true"':''}>D${sa('d')}</th>
@@ -2201,16 +2602,24 @@
       const crossPct = team.crosses > 0 ? ((team.crossesAcc / team.crosses) * 100).toFixed(0) : '0';
       const gdClass = gd > 0 ? 'gd-pos' : gd < 0 ? 'gd-neg' : 'gd-zero';
 
-      // Zone assignment: champion (1st), promotion (2-4), relegation (bottom 3)
+      // Zone: 1st=Champion, 2-3=Playoff, (N-3)th=Relegation Playoff, bottom 3=Relegation
       let zoneClass = '';
       if (team.leaguePosition === 1) zoneClass = 'zone-champion';
-      else if (team.leaguePosition <= 4) zoneClass = 'zone-promotion';
+      else if (team.leaguePosition <= 3) zoneClass = 'zone-playoff';
+      else if (totalTeams >= 6 && team.leaguePosition === totalTeams - 3) zoneClass = 'zone-relplayoff';
       else if (team.leaguePosition > totalTeams - 3) zoneClass = 'zone-relegation';
+
+      // Form bubbles
+      const recentForm = getRecentForm(team, 5);
+      const formHtml = recentForm.length
+        ? `<div class="form-dots">${recentForm.map(r => `<span class="form-dot ${r}">${r}</span>`).join('')}</div>`
+        : '<span style="color:var(--text-dim);font-size:11px;">—</span>';
 
       const tr = document.createElement('tr');
       tr.className = 'team-row' + (zoneClass ? ' ' + zoneClass : '');
       tr.innerHTML = `
         <td><span class="pos-num">${team.leaguePosition}</span>${escapeHtml(team.teamName)}</td>
+        <td>${formHtml}</td>
         <td>${team.matchCount}</td>
         <td class="stat-w">${team.wins}</td>
         <td class="stat-d">${team.draws}</td>
@@ -2243,20 +2652,42 @@
       const trExp = document.createElement('tr');
       trExp.className = 'expanded-row';
       const tdExp = document.createElement('td');
-      tdExp.colSpan = 27;
+      tdExp.colSpan = 28;
 
       const content = document.createElement('div');
       content.className = 'expanded-content';
 
+      // ---- TEAM OVERVIEW ----
+      const overviewDiv = document.createElement('div');
+      overviewDiv.className = 'expand-section';
+      overviewDiv.innerHTML = buildTeamOverview(team);
+      content.appendChild(overviewDiv);
+
+      // ---- SCORE DISTRIBUTION ----
+      const scoreDiv = document.createElement('div');
+      scoreDiv.className = 'expand-section';
+      scoreDiv.innerHTML = buildScoreDistribution(team);
+      content.appendChild(scoreDiv);
+
+      // ---- FORMATION RECORD ----
+      const formationDiv = document.createElement('div');
+      formationDiv.className = 'expand-section';
+      formationDiv.innerHTML = buildFormationRecord(team);
+      content.appendChild(formationDiv);
+
+      // ---- PLAYER TABLE ----
       const playerTableDiv = document.createElement('div');
+      playerTableDiv.className = 'expand-section';
+      const playerTitle = document.createElement('div');
+      playerTitle.className = 'expand-section-title';
+      playerTitle.textContent = 'Player Statistics';
+      playerTableDiv.appendChild(playerTitle);
       content.appendChild(playerTableDiv);
 
+      // ---- MATCH HISTORY ----
       const matchTableDiv = document.createElement('div');
-      matchTableDiv.className = 'match-table-wrapper';
-      matchTableDiv.innerHTML = '<div style="margin-bottom: 8px; font-weight: bold;">Match History</div>';
-
-      const matchTable = createMatchTable(team);
-      matchTableDiv.appendChild(matchTable);
+      matchTableDiv.className = 'expand-section match-table-wrapper';
+      rebuildMatchSection(matchTableDiv, team);
       content.appendChild(matchTableDiv);
 
       tdExp.appendChild(content);
@@ -2266,7 +2697,7 @@
       tr.onclick = async () => {
         const isOpen = trExp.classList.toggle('open');
         if (isOpen) {
-          if (!playerTableDiv.hasChildNodes()) {
+          if (playerTableDiv.children.length <= 1) {
             renderPlayerTable(playerTableDiv, team);
           }
 
@@ -2277,13 +2708,14 @@
 
             try {
               await loadFormationsForTeam(team, globalMetadataMap);
-              matchTableDiv.innerHTML = '<div style="margin-bottom: 8px; font-weight: bold;">Match History</div>';
-              matchTableDiv.appendChild(createMatchTable(team));
+              rebuildMatchSection(matchTableDiv, team);
+              // Also refresh formation record now that oppFormations are known
+              formationDiv.innerHTML = buildFormationRecord(team);
             } catch (e) {
               console.error(`Failed to load formations:`, e);
             }
 
-            if (prevStatus) setStatus(prevStatus);
+            if (prevStatus) setStatus(prevStatus, 'success');
           }
         }
       };
@@ -2311,15 +2743,17 @@
   // ============================================================================
   // UI: MATCH TABLE
   // ============================================================================
-  function createMatchTable(team) {
+  function createMatchTable(team, activeFilter) {
+    activeFilter = activeFilter || 'all';
     const table = document.createElement('table');
     table.className = 'player-table';
 
     const thead = document.createElement('thead');
     thead.innerHTML = `
       <tr>
+        <th>Result</th>
         <th>Date</th>
-        <th>Opp</th>
+        <th>Opponent</th>
         <th>H/A</th>
         <th>Score</th>
         <th>xG</th>
@@ -2329,12 +2763,12 @@
         <th>SoT</th>
         <th>SoTA</th>
         <th>Poss</th>
-        <th>XI Overall</th>
         <th>Formation</th>
-        <th>Opp XI</th>
-        <th>Opp Form</th>
-        <th>Top Chance Creator</th>
-        <th>Opp Top Chance Creator</th>
+        <th>XI OVR</th>
+        <th>Opp Formation</th>
+        <th>Opp XI OVR</th>
+        <th>Top CC</th>
+        <th>Opp Top CC</th>
       </tr>
     `;
     table.appendChild(thead);
@@ -2347,25 +2781,31 @@
     });
 
     sorted.forEach((m) => {
+      const result = m.scoreFor > m.scoreAgainst ? 'W' : m.scoreFor < m.scoreAgainst ? 'L' : 'D';
+      if (activeFilter === 'w' && result !== 'W') return;
+      if (activeFilter === 'd' && result !== 'D') return;
+      if (activeFilter === 'l' && result !== 'L') return;
+
       const tr = document.createElement('tr');
-      const dateStr = m.date ? new Date(m.date).toLocaleString() : '—';
-      // Look up opponent name from globalTeamsMap
+      const rowClass = result === 'W' ? 'match-row-w' : result === 'D' ? 'match-row-d' : 'match-row-l';
+      tr.className = rowClass;
+
+      const dateStr = m.date ? new Date(m.date).toLocaleDateString() : '—';
       let oppName = m.opponentClubId || '—';
       if (m.opponentClubId && globalTeamsMap) {
         const oppTeam = globalTeamsMap.get(m.opponentClubId);
-        if (oppTeam && oppTeam.teamName) {
-          oppName = oppTeam.teamName;
-        }
+        if (oppTeam && oppTeam.teamName) oppName = oppTeam.teamName;
       }
 
       const topCC = m.topChanceCreator || { name: '—', chances: 0 };
       const oppTopCC = m.oppTopChanceCreator || { name: '—', chances: 0 };
 
       tr.innerHTML = `
+        <td><span class="result-badge ${result}">${result}</span></td>
         <td>${dateStr}</td>
-        <td>${oppName}</td>
+        <td>${escapeHtml(oppName)}</td>
         <td>${m.homeAway === 'H' ? 'Home' : 'Away'}</td>
-        <td>${m.scoreFor} - ${m.scoreAgainst}</td>
+        <td style="font-weight:700">${m.scoreFor} – ${m.scoreAgainst}</td>
         <td>${m.xGFor.toFixed(2)}</td>
         <td>${m.xGAgainst.toFixed(2)}</td>
         <td>${m.shotsFor}</td>
@@ -2373,12 +2813,12 @@
         <td>${m.sotFor}</td>
         <td>${m.sotAgainst}</td>
         <td>${m.possFor.toFixed(0)}%</td>
-        <td>${m.xiOverall.toFixed(2)}</td>
         <td>${m.formation || '—'}</td>
-        <td>${m.oppXiOverall.toFixed(2)}</td>
+        <td>${m.xiOverall.toFixed(2)}</td>
         <td>${m.oppFormation || '—'}</td>
-        <td>${topCC.name} (${topCC.chances})</td>
-        <td>${oppTopCC.name} (${oppTopCC.chances})</td>
+        <td>${m.oppXiOverall.toFixed(2)}</td>
+        <td>${escapeHtml(topCC.name)} (${topCC.chances})</td>
+        <td>${escapeHtml(oppTopCC.name)} (${oppTopCC.chances})</td>
       `;
       tbody.appendChild(tr);
     });
